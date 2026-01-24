@@ -90,7 +90,7 @@ const tryLoadDocument = (next: Document, emitChanges: boolean): void => {
 const tryLoadJson = (value: string, emitChanges: boolean): void => {
   try {
     const parsed = parseDocument(value);
-    tryLoadDocument(parsed, emitChanges);
+    setDocument(parsed, emitChanges);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Invalid JSON";
     emit("error", new Error(message));
