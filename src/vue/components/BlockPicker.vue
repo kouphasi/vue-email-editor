@@ -1,8 +1,26 @@
 <template>
   <div class="ee-block-picker">
-    <button type="button" class="ee-pill" @click="addText">Add Text</button>
-    <button type="button" class="ee-pill" @click="addButton">Add Button</button>
-    <button type="button" class="ee-pill" @click="addImage">Add Image</button>
+    <button
+      type="button"
+      class="ee-pill"
+      @click="addText"
+    >
+      Add Text
+    </button>
+    <button
+      type="button"
+      class="ee-pill"
+      @click="addButton"
+    >
+      Add Button
+    </button>
+    <button
+      type="button"
+      class="ee-pill"
+      @click="addImage"
+    >
+      Add Image
+    </button>
   </div>
 </template>
 
@@ -42,7 +60,7 @@ const createImageBlock = (): ImageBlock => ({
   id: createId(),
   type: "image",
   url: "",
-  status: "ready",
+  status: "pending",
   display: {
     align: "center"
   }

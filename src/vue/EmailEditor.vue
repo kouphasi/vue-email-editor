@@ -2,11 +2,14 @@
   <div class="ee-root">
     <div class="ee-toolbar">
       <BlockPicker @add="handleAddBlock" />
-      <PreviewToggle :mode="document.layout.previewMode" @change="handlePreviewChange" />
+      <PreviewToggle
+        :mode="editorDocument.layout.previewMode"
+        @change="handlePreviewChange"
+      />
     </div>
     <BlockList
-      :document="document"
-      :width-px="document.layout.previewWidthPx"
+      :document="editorDocument"
+      :width-px="editorDocument.layout.previewWidthPx"
       :on-image-upload="onImageUpload"
       @update-block="handleUpdateBlock"
       @reorder="handleReorder"
@@ -35,8 +38,10 @@ const props = withDefaults(
     onImageUpload?: ImageUploadHandler;
   }>(),
   {
+    modelValue: undefined,
     previewMode: "desktop",
-    document: null
+    document: null,
+    onImageUpload: undefined,
   }
 );
 
@@ -59,7 +64,7 @@ const createId = (): string => {
 const documentRef = ref<Document>(createDocument(createId()));
 let lastSerialized = serializeDocument(documentRef.value);
 
-const document = computed(() => documentRef.value);
+const editorDocument = computed(() => documentRef.value);
 
 const setDocument = (next: Document, emitChanges: boolean): void => {
   documentRef.value = next;

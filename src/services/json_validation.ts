@@ -46,6 +46,8 @@ const validateButtonBlock = (block: ButtonBlock): string[] => {
   return errors;
 };
 
+const IMAGE_STATUSES: ImageBlock["status"][] = ["pending", "ready", "uploading", "error"];
+
 const validateImageBlock = (block: ImageBlock): string[] => {
   const errors: string[] = [];
 
@@ -53,8 +55,8 @@ const validateImageBlock = (block: ImageBlock): string[] => {
     errors.push(`Invalid image URL in block ${block.id}`);
   }
 
-  if (!block.status) {
-    errors.push(`Missing image status in block ${block.id}`);
+  if (!IMAGE_STATUSES.includes(block.status)) {
+    errors.push(`Invalid image status in block ${block.id}`);
   }
 
   return errors;

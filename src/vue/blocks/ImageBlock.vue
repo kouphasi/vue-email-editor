@@ -6,15 +6,21 @@
         :value="block.url"
         placeholder="https://example.com/image.png"
         @input="handleUrlInput"
-      />
+      >
       <span class="ee-image-status">{{ block.status }}</span>
       <select
         :value="block.display.align ?? 'center'"
         @change="handleAlignChange"
       >
-        <option value="left">left</option>
-        <option value="center">center</option>
-        <option value="right">right</option>
+        <option value="left">
+          left
+        </option>
+        <option value="center">
+          center
+        </option>
+        <option value="right">
+          right
+        </option>
       </select>
       <input
         type="number"
@@ -22,17 +28,26 @@
         :value="block.display.widthPx ?? ''"
         placeholder="Width"
         @input="handleWidthInput"
-      />
+      >
       <input
         type="number"
         min="0"
         :value="block.display.heightPx ?? ''"
         placeholder="Height"
         @input="handleHeightInput"
-      />
-      <input type="file" accept="image/*" @change="handleFileChange" />
+      >
+      <input
+        type="file"
+        accept="image/*"
+        @change="handleFileChange"
+      >
     </div>
-    <img v-if="block.url" class="ee-image-preview" :src="block.url" alt="Image preview" />
+    <img
+      v-if="block.url"
+      class="ee-image-preview"
+      :src="block.url"
+      alt="Image preview"
+    >
   </div>
 </template>
 
@@ -68,7 +83,11 @@ const updateDisplay = (display: Partial<ImageBlock["display"]>): void => {
 
 const handleUrlInput = (event: Event): void => {
   const input = event.target as HTMLInputElement;
-  update({ url: input.value });
+  const nextUrl = input.value;
+  update({
+    url: nextUrl,
+    status: nextUrl ? "ready" : "pending"
+  });
 };
 
 const handleAlignChange = (event: Event): void => {

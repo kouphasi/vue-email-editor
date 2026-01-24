@@ -16,5 +16,8 @@
     "useDefineForClassFields": true,
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  "vueCompilerOptions": {
+    "target": 2.7
+  }
 }
