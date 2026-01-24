@@ -21,7 +21,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import type { TextBlock } from "../../core/types";
-import { applyBoldToggle, applyColor } from "../../core/text_formatting";
+import { adjustRunsForTextChange, applyBoldToggle, applyColor } from "../../core/text_formatting";
 
 const props = defineProps<{
   block: TextBlock;
@@ -32,6 +32,7 @@ const emit = defineEmits<{
 }>();
 
 const contentRef = ref<HTMLDivElement | null>(null);
+const lastText = ref(props.block.text);
 
 const escapeHtml = (value: string): string => {
   return value
@@ -125,10 +126,12 @@ const getSelectionRange = (): { start: number; end: number } | null => {
 
 const handleInput = (): void => {
   const nextText = contentRef.value?.textContent ?? "";
+  const nextRuns = adjustRunsForTextChange(lastText.value, nextText, props.block.runs);
+  lastText.value = nextText;
   emit("update", {
     ...props.block,
     text: nextText,
-    runs: []
+    runs: nextRuns
   });
 };
 
@@ -180,7 +183,10 @@ onMounted(updateHtml);
 
 watch(
   () => [props.block.text, props.block.runs],
-  () => updateHtml(),
+  () => {
+    lastText.value = props.block.text;
+    updateHtml();
+  },
   { deep: true }
 );
 </script>

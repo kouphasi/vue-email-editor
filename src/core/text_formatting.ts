@@ -191,3 +191,102 @@ export const applyColor = (
 
   return segmentsToRuns(mergeSegments(updated));
 };
+
+export const adjustRunsForTextChange = (
+  previousText: string,
+  nextText: string,
+  runs: TextRun[]
+): TextRun[] => {
+  if (previousText === nextText) {
+    return runs;
+  }
+
+  const previousLength = previousText.length;
+  const nextLength = nextText.length;
+  const minLength = Math.min(previousLength, nextLength);
+
+  let start = 0;
+  while (start < minLength && previousText[start] === nextText[start]) {
+    start += 1;
+  }
+
+  let previousEnd = previousLength - 1;
+  let nextEnd = nextLength - 1;
+  while (
+    previousEnd >= start &&
+    nextEnd >= start &&
+    previousText[previousEnd] === nextText[nextEnd]
+  ) {
+    previousEnd -= 1;
+    nextEnd -= 1;
+  }
+
+  const oldChangeEnd = previousEnd >= start ? previousEnd + 1 : start;
+  const delta = nextLength - previousLength;
+
+  const clamp = (value: number): number => {
+    return Math.min(Math.max(value, 0), nextLength);
+  };
+
+  const updated: TextRun[] = [];
+
+  const pushRun = (run: TextRun): void => {
+    const startClamped = clamp(run.start);
+    const endClamped = clamp(run.end);
+    if (endClamped > startClamped) {
+      updated.push({
+        ...run,
+        start: startClamped,
+        end: endClamped
+      });
+    }
+  };
+
+  for (const run of runs) {
+    if (run.end <= start) {
+      pushRun(run);
+      continue;
+    }
+
+    if (run.start >= oldChangeEnd) {
+      pushRun({
+        ...run,
+        start: run.start + delta,
+        end: run.end + delta
+      });
+      continue;
+    }
+
+    if (run.start < start) {
+      pushRun({
+        ...run,
+        end: Math.min(run.end, start)
+      });
+    }
+
+    if (run.end > oldChangeEnd) {
+      pushRun({
+        ...run,
+        start: Math.max(run.start, oldChangeEnd) + delta,
+        end: run.end + delta
+      });
+    }
+  }
+
+  updated.sort((a, b) => a.start - b.start);
+
+  const merged: TextRun[] = [];
+  for (const run of updated) {
+    const last = merged[merged.length - 1];
+    if (last && last.end === run.start && last.bold === run.bold && last.color === run.color) {
+      last.end = run.end;
+      continue;
+    }
+
+    merged.push({
+      ...run
+    });
+  }
+
+  return merged;
+};
