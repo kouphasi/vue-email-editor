@@ -1,8 +1,9 @@
-export default {
+module.exports = {
   root: true,
   env: {
     browser: true,
-    es2022: true
+    node: true,
+    es6: true
   },
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -11,5 +12,8 @@ export default {
   },
   plugins: ["@typescript-eslint"],
   extends: ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
-  ignorePatterns: ["dist/", "build/"]
+  ignorePatterns: ["dist/", "build/"],
+  rules: {
+    "no-useless-escape": "off"
+  }
 };
