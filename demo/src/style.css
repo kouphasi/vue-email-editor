@@ -1,0 +1,23 @@
+:root {
+  color-scheme: light;
+  font-family: "Avenir Next", "Futura", "Trebuchet MS", sans-serif;
+  background-color: #f6f2ea;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top left, #fef2d8 0%, #f7f3ec 45%, #f0f1fb 100%);
+  color: #1c1b1a;
+}
+
+button {
+  font-family: inherit;
+}
+
+#app {
+  min-height: 100vh;
+}
