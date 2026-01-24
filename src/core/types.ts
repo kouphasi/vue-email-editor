@@ -42,7 +42,7 @@ export interface ButtonBlock extends BlockBase {
   backgroundColor: string;
 }
 
-export type ImageStatus = "ready" | "uploading" | "error";
+export type ImageStatus = "pending" | "ready" | "uploading" | "error";
 export type ImageAlign = "left" | "center" | "right";
 
 export interface ImageBlock extends BlockBase {
