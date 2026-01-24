@@ -36,6 +36,7 @@
             :width-px="editorDocument.layout.previewWidthPx"
             :on-image-upload="onImageUpload"
             @update-block="handleUpdateBlock"
+            @delete-block="handleDeleteBlock"
             @reorder="handleReorder"
           />
         </div>
@@ -66,7 +67,14 @@
 import { computed, ref, watch, toRefs } from "vue";
 import type { Block, Document, PreviewMode } from "../core/types";
 import type { ImageUploadHandler } from "../core/editor_api";
-import { addBlock, createDocument, reorderBlocks, setPreviewMode, updateBlock } from "../services/document_service";
+import {
+  addBlock,
+  createDocument,
+  deleteBlock,
+  reorderBlocks,
+  setPreviewMode,
+  updateBlock
+} from "../services/document_service";
 import { exportHtml } from "../services/html_export";
 import { parseDocument } from "../services/json_import";
 import { serializeDocument } from "../services/json_export";
@@ -176,6 +184,10 @@ const handleUpdateBlock = (block: Block): void => {
 
 const handleReorder = (fromIndex: number, toIndex: number): void => {
   setDocument(reorderBlocks(documentRef.value, fromIndex, toIndex), true);
+};
+
+const handleDeleteBlock = (blockId: string): void => {
+  setDocument(deleteBlock(documentRef.value, blockId), true);
 };
 
 const handlePreviewChange = (mode: PreviewMode): void => {

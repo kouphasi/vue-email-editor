@@ -15,6 +15,16 @@
       @drop.prevent="handleDrop(block.id)"
       @dragend="handleDragEnd"
     >
+      <div class="ee-block-item-header">
+        <span class="ee-block-item-label">{{ getBlockLabel(block) }}</span>
+        <button
+          type="button"
+          class="ee-block-item-delete"
+          @click="handleDelete(block.id)"
+        >
+          Remove
+        </button>
+      </div>
       <TextBlock v-if="block.type === 'text'" :block="block" @update="emitUpdate" />
       <ButtonBlock v-else-if="block.type === 'button'" :block="block" @update="emitUpdate" />
       <ImageBlock
@@ -45,6 +55,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (event: "update-block", block: Block): void;
   (event: "reorder", fromIndex: number, toIndex: number): void;
+  (event: "delete-block", blockId: string): void;
 }>();
 
 const draggingId = ref<string | null>(null);
@@ -52,6 +63,23 @@ const dragOverId = ref<string | null>(null);
 
 const emitUpdate = (block: Block): void => {
   emit("update-block", block);
+};
+
+const getBlockLabel = (block: Block): string => {
+  switch (block.type) {
+    case "text":
+      return "Text block";
+    case "button":
+      return "Button block";
+    case "image":
+      return "Image block";
+    default:
+      return "Block";
+  }
+};
+
+const handleDelete = (blockId: string): void => {
+  emit("delete-block", blockId);
 };
 
 const handleDragStart = (id: string, event: DragEvent): void => {
@@ -117,6 +145,51 @@ const handleDragEnd = (): void => {
   border-radius: 10px;
   padding: 12px;
   background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ee-block-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ee-block-item-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ee-muted);
+}
+
+.ee-block-item-delete {
+  border: 1px solid var(--ee-border);
+  background: #fff;
+  color: var(--ee-muted);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    color 150ms ease,
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.ee-block-item-delete:hover {
+  border-color: #c2410c;
+  color: #c2410c;
+  background: #fff7ed;
+  transform: translateY(-1px);
+}
+
+.ee-block-item-delete:focus-visible {
+  outline: 2px solid rgba(194, 65, 12, 0.25);
+  outline-offset: 2px;
 }
 
 .ee-block-item.is-dragging {
