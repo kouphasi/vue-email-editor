@@ -87,11 +87,32 @@ const addImage = (): void => {
 }
 
 .ee-pill {
-  border: 1px solid var(--ee-border);
-  background: #fff;
+  border: 1px solid var(--ee-control-border);
+  background: var(--ee-control-bg);
   border-radius: 999px;
-  padding: 6px 12px;
+  padding: 7px 14px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ee-text-color);
+  box-shadow: 0 10px 20px rgba(28, 24, 18, 0.08);
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+.ee-pill:hover {
+  border-color: var(--ee-primary);
+  background: var(--ee-control-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px rgba(28, 24, 18, 0.12);
+}
+
+.ee-pill:focus-visible {
+  outline: 2px solid var(--ee-ring);
+  outline-offset: 2px;
 }
 </style>
