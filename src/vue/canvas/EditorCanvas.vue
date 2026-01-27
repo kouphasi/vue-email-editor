@@ -47,6 +47,10 @@
             :selected="selectedBlockId === block.id"
             @select="handleSelect(block.id)"
           />
+          <CanvasHtmlBlock
+            v-else-if="block.type === 'html'"
+            :block="block"
+          />
         </CanvasBlock>
       </div>
       
@@ -64,6 +68,7 @@ import CanvasBlock from "./CanvasBlock.vue";
 import CanvasTextBlock from "./CanvasTextBlock.vue";
 import CanvasButtonBlock from "./CanvasButtonBlock.vue";
 import CanvasImageBlock from "./CanvasImageBlock.vue";
+import CanvasHtmlBlock from "./CanvasHtmlBlock.vue";
 
 const props = defineProps<{
   document: Document;

@@ -1,4 +1,4 @@
-export type BlockType = "text" | "button" | "image";
+export type BlockType = "text" | "button" | "image" | "html";
 export type PreviewMode = "mobile" | "desktop";
 export type PreviewWidthPx = 375 | 640;
 
@@ -56,7 +56,12 @@ export interface ImageBlock extends BlockBase {
   };
 }
 
-export type Block = TextBlock | ButtonBlock | ImageBlock;
+export interface HtmlBlock extends BlockBase {
+  type: "html";
+  content: string;
+}
+
+export type Block = TextBlock | ButtonBlock | ImageBlock | HtmlBlock;
 
 export const PREVIEW_WIDTHS: Record<PreviewMode, PreviewWidthPx> = {
   mobile: 375,

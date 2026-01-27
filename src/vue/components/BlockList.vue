@@ -33,6 +33,7 @@
         :on-image-upload="onImageUpload"
         @update="emitUpdate"
       />
+      <HtmlBlock v-else-if="block.type === 'html'" :block="block" @update="emitUpdate" />
       <div v-else class="ee-unknown">Unsupported block</div>
     </div>
   </div>
@@ -45,6 +46,7 @@ import type { ImageUploadHandler } from "../../core/editor_api";
 import TextBlock from "../blocks/TextBlock.vue";
 import ButtonBlock from "../blocks/ButtonBlock.vue";
 import ImageBlock from "../blocks/ImageBlock.vue";
+import HtmlBlock from "../blocks/HtmlBlock.vue";
 
 const props = defineProps<{
   document: Document;
@@ -73,6 +75,8 @@ const getBlockLabel = (block: Block): string => {
       return "Button block";
     case "image":
       return "Image block";
+    case "html":
+      return "HTML block";
     default:
       return "Block";
   }

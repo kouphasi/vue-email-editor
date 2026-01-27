@@ -21,11 +21,18 @@
     >
       Add Image
     </button>
+    <button
+      type="button"
+      class="ee-pill"
+      @click="addHtml"
+    >
+      Add HTML
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Block, ButtonBlock, ImageBlock, TextBlock } from "../../core/types";
+import type { Block, ButtonBlock, ImageBlock, TextBlock, HtmlBlock } from "../../core/types";
 
 const emit = defineEmits<{
   (event: "add", block: Block): void;
@@ -66,6 +73,12 @@ const createImageBlock = (): ImageBlock => ({
   }
 });
 
+const createHtmlBlock = (): HtmlBlock => ({
+  id: createId(),
+  type: "html",
+  content: ""
+});
+
 const addText = (): void => {
   emit("add", createTextBlock());
 };
@@ -76,6 +89,10 @@ const addButton = (): void => {
 
 const addImage = (): void => {
   emit("add", createImageBlock());
+};
+
+const addHtml = (): void => {
+  emit("add", createHtmlBlock());
 };
 </script>
 

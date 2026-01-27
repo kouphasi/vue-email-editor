@@ -1,4 +1,4 @@
-import { Block, ButtonBlock, ImageBlock, TextBlock } from "../core/types";
+import { Block, ButtonBlock, ImageBlock, TextBlock, HtmlBlock } from "../core/types";
 
 const escapeHtml = (value: string): string => {
   return value
@@ -83,6 +83,10 @@ const renderImageBlock = (block: ImageBlock): string => {
   return `<div style=\"text-align:${align};margin:0 0 16px 0;\"><img src=\"${block.url}\" alt=\"\" style=\"${styles}\" /></div>`;
 };
 
+const renderHtmlBlock = (block: HtmlBlock): string => {
+  return block.content;
+};
+
 export const renderBlockHtml = (block: Block): string => {
   switch (block.type) {
     case "text":
@@ -91,6 +95,8 @@ export const renderBlockHtml = (block: Block): string => {
       return renderButtonBlock(block);
     case "image":
       return renderImageBlock(block);
+    case "html":
+      return renderHtmlBlock(block);
     default:
       return "";
   }

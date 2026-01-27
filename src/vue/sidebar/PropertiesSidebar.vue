@@ -37,6 +37,12 @@
         :on-image-upload="onImageUpload"
         @update="$emit('update-block', $event)"
       />
+      
+      <HtmlBlockProperties
+        v-else-if="selectedBlock.type === 'html'"
+        :block="selectedBlock"
+        @update="$emit('update-block', $event)"
+      />
     </div>
   </div>
 </template>
@@ -49,6 +55,7 @@ import DocumentProperties from "./DocumentProperties.vue";
 import TextBlockProperties from "./TextBlockProperties.vue";
 import ButtonBlockProperties from "./ButtonBlockProperties.vue";
 import ImageBlockProperties from "./ImageBlockProperties.vue";
+import HtmlBlockProperties from "./HtmlBlockProperties.vue";
 
 const props = defineProps<{
   document: Document;
@@ -79,6 +86,7 @@ const title = computed(() => {
     case "text": return "Text Properties";
     case "button": return "Button Properties";
     case "image": return "Image Properties";
+    case "html": return "HTML Properties";
     default: return "Block Properties";
   }
 });
