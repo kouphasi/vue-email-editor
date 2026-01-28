@@ -111,7 +111,6 @@ export interface ValidationResult {
 export interface CustomBlockDefinition {
   id: string;
   displayName: string;
-  category: string;
   settingsSchema: SettingsSchema;
   defaultConfig: Record<string, unknown>;
   validate: (config: Record<string, unknown>, context?: unknown) => ValidationResult;

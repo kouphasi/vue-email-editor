@@ -6,10 +6,9 @@ import { serializeDocument } from "../../src/services/json_export";
 import { createCustomBlockInstance } from "../../src/services/document_service";
 import BlockPicker from "../../src/vue/components/BlockPicker.vue";
 
-const createDefinition = (id: string): CustomBlockDefinition => ({
+const createDefinition = (id: string, displayName = "Hero"): CustomBlockDefinition => ({
   id,
-  displayName: "Hero",
-  category: "Marketing",
+  displayName,
   settingsSchema: {
     fields: [
       { key: "headline", label: "Headline", type: "string", required: true, default: "Hello" }
@@ -21,7 +20,7 @@ const createDefinition = (id: string): CustomBlockDefinition => ({
 });
 
 describe("Custom block registration", () => {
-  it("shows registered custom blocks in the picker with category", async () => {
+  it("shows registered custom blocks in the picker", async () => {
     const definition = createDefinition(`hero-${Date.now()}`);
     registerCustomBlock(definition);
 
@@ -29,21 +28,21 @@ describe("Custom block registration", () => {
     await wrapper.vm.$nextTick();
 
     const { getByText } = getQueriesForElement(wrapper.element as HTMLElement);
-    expect(getByText("Marketing")).toBeTruthy();
     expect(getByText("Add Hero")).toBeTruthy();
 
     wrapper.destroy();
   });
 
   it("creates a custom block instance with default config when inserted", async () => {
-    const definition = createDefinition(`hero-${Date.now()}-insert`);
+    const uniqueName = `Hero-${Date.now()}`;
+    const definition = createDefinition(`hero-${Date.now()}-insert`, uniqueName);
     registerCustomBlock(definition);
 
     const wrapper = shallowMount(BlockPicker);
     await wrapper.vm.$nextTick();
 
     const { getByText } = getQueriesForElement(wrapper.element as HTMLElement);
-    const button = getByText("Add Hero");
+    const button = getByText(`Add ${uniqueName}`);
     button.dispatchEvent(new MouseEvent("click"));
 
     const emitted = wrapper.emitted("add");

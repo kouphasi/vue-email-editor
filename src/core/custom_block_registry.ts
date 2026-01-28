@@ -15,11 +15,6 @@ export class DuplicateCustomBlockDefinitionError extends Error {
 const registry = new Map<string, CustomBlockDefinition>();
 const subscribers = new Set<RegistrySubscriber>();
 
-const normalizeCategory = (category: string): string => {
-  const normalized = category?.trim();
-  return normalized ? normalized : "Uncategorized";
-};
-
 const notifySubscribers = (): void => {
   const snapshot = listCustomBlockDefinitions();
   for (const subscriber of subscribers) {
@@ -44,11 +39,6 @@ export const getCustomBlockDefinition = (
 
 export const listCustomBlockDefinitions = (): CustomBlockDefinition[] => {
   return [...registry.values()].sort((a, b) => {
-    const categoryA = normalizeCategory(a.category);
-    const categoryB = normalizeCategory(b.category);
-    if (categoryA !== categoryB) {
-      return categoryA.localeCompare(categoryB);
-    }
     return a.displayName.localeCompare(b.displayName);
   });
 };
@@ -68,7 +58,6 @@ const isDefinitionValid = (definition: CustomBlockDefinition): boolean => {
   return Boolean(
     definition.id &&
       definition.displayName &&
-      definition.category &&
       definition.settingsSchema &&
       Array.isArray(definition.settingsSchema.fields) &&
       definition.defaultConfig &&

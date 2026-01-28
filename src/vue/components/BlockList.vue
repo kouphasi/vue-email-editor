@@ -18,9 +18,6 @@
       <div class="ee-block-item-header">
         <span class="ee-block-item-label">
           {{ getBlockLabel(block) }}
-          <span v-if="block.type === 'custom'" class="ee-block-item-category">
-            {{ getCustomCategory(block) }}
-          </span>
         </span>
         <button
           type="button"
@@ -105,11 +102,6 @@ const getBlockLabel = (block: Block): string => {
     default:
       return "Block";
   }
-};
-
-const getCustomCategory = (block: CustomBlockInstance): string => {
-  const definition = customDefinitions.value.get(block.definitionId);
-  return definition?.category?.trim() || "Uncategorized";
 };
 
 const resolveCustomBlock = (block: CustomBlockInstance): CustomBlockInstance => {
@@ -221,14 +213,6 @@ onBeforeUnmount(() => {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--ee-muted);
-}
-
-.ee-block-item-category {
-  margin-left: 6px;
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: 0.03em;
-  color: var(--ee-text-color);
 }
 
 .ee-block-item-delete {

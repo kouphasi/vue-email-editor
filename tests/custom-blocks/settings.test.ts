@@ -1,4 +1,3 @@
-import { getQueriesForElement } from "@testing-library/dom";
 import { mount } from "@vue/test-utils";
 import type { CustomBlockDefinition, Document } from "../../src/core/types";
 import { registerCustomBlock } from "../../src/core/custom_block_registry";
@@ -7,23 +6,23 @@ import { serializeDocument } from "../../src/services/json_export";
 import CustomBlock from "../../src/vue/blocks/CustomBlock.vue";
 import CustomBlockProperties from "../../src/vue/sidebar/CustomBlockProperties.vue";
 
-const createDefinition = (id: string): CustomBlockDefinition => ({
+const createDefinition = (id: string, fieldKey = "headline"): CustomBlockDefinition => ({
   id,
   displayName: "Hero",
-  category: "Marketing",
   settingsSchema: {
     fields: [
-      { key: "headline", label: "Headline", type: "string", required: true, default: "Hello" }
+      { key: fieldKey, label: fieldKey.charAt(0).toUpperCase() + fieldKey.slice(1), type: "string", required: true, default: "Hello" }
     ]
   },
-  defaultConfig: { headline: "Hello" },
+  defaultConfig: { [fieldKey]: "Hello" },
   validate: () => ({ ok: true, missingFields: [] }),
-  renderHtml: (config) => `<div class=\"hero\">${config.headline}</div>`
+  renderHtml: (config) => `<div class="hero">${config[fieldKey]}</div>`
 });
 
 describe("Custom block settings", () => {
   it("updates the preview when a setting changes", async () => {
-    const definition = createDefinition(`hero-${Date.now()}-settings`);
+    const fieldKey = `title${Date.now()}`;
+    const definition = createDefinition(`hero-${Date.now()}-settings`, fieldKey);
     registerCustomBlock(definition);
 
     const block = createCustomBlockInstance(definition.id);
@@ -48,8 +47,7 @@ describe("Custom block settings", () => {
 
     await wrapper.vm.$nextTick();
 
-    const { getByLabelText } = getQueriesForElement(wrapper.element as HTMLElement);
-    const input = getByLabelText("Headline") as HTMLInputElement;
+    const input = wrapper.element.querySelector(`#custom-field-${fieldKey}`) as HTMLInputElement;
     input.value = "Updated headline";
     input.dispatchEvent(new Event("input"));
 
@@ -60,7 +58,8 @@ describe("Custom block settings", () => {
   });
 
   it("persists edited custom block settings after save and reopen", async () => {
-    const definition = createDefinition(`hero-${Date.now()}-persist`);
+    const fieldKey = `content${Date.now()}`;
+    const definition = createDefinition(`hero-${Date.now()}-persist`, fieldKey);
     registerCustomBlock(definition);
 
     const block = createCustomBlockInstance(definition.id);
@@ -80,8 +79,7 @@ describe("Custom block settings", () => {
 
     await wrapper.vm.$nextTick();
 
-    const { getByLabelText } = getQueriesForElement(wrapper.element as HTMLElement);
-    const input = getByLabelText("Headline") as HTMLInputElement;
+    const input = wrapper.element.querySelector(`#custom-field-${fieldKey}`) as HTMLInputElement;
     input.value = "Persisted headline";
     input.dispatchEvent(new Event("input"));
 
@@ -97,7 +95,7 @@ describe("Custom block settings", () => {
     const json = serializeDocument(document);
     const parsed = JSON.parse(json) as Document;
     const parsedBlock = parsed.blocks[0] as typeof updatedBlock;
-    expect(parsedBlock.config).toMatchObject({ headline: "Persisted headline" });
+    expect(parsedBlock.config).toMatchObject({ [fieldKey]: "Persisted headline" });
 
     wrapper.destroy();
   });

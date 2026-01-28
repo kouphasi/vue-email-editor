@@ -4,10 +4,9 @@ import type { CustomBlockDefinition, Document } from "../../src/core/types";
 import { registerCustomBlock } from "../../src/core/custom_block_registry";
 import BlockList from "../../src/vue/components/BlockList.vue";
 
-const createDefinition = (id: string): CustomBlockDefinition => ({
+const createDefinition = (id: string, displayName = "Hero"): CustomBlockDefinition => ({
   id,
-  displayName: "Hero",
-  category: "Marketing",
+  displayName,
   settingsSchema: {
     fields: [
       { key: "headline", label: "Headline", type: "string", required: true, default: "Hello" }
@@ -47,7 +46,8 @@ describe("Custom block fallback behavior", () => {
   });
 
   it("renders normally once the definition is registered", async () => {
-    const definition = createDefinition(`hero-${Date.now()}-restore`);
+    const uniqueName = `Hero-${Date.now()}`;
+    const definition = createDefinition(`hero-${Date.now()}-restore`, uniqueName);
 
     const document: Document = {
       id: "doc-restore",
@@ -71,9 +71,8 @@ describe("Custom block fallback behavior", () => {
     registerCustomBlock(definition);
     await wrapper.vm.$nextTick();
 
-    const { getByText } = getQueriesForElement(wrapper.element as HTMLElement);
-    expect(getByText("Hero")).toBeTruthy();
-    expect(getByText("Marketing")).toBeTruthy();
+    const { getAllByText } = getQueriesForElement(wrapper.element as HTMLElement);
+    expect(getAllByText(uniqueName).length).toBeGreaterThan(0);
 
     wrapper.destroy();
   });

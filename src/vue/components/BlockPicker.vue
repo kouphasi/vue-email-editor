@@ -29,31 +29,20 @@
       Add HTML
     </button>
 
-    <div v-if="customBlockGroups.length" class="ee-custom-blocks">
-      <div
-        v-for="group in customBlockGroups"
-        :key="group.category"
-        class="ee-custom-block-group"
-      >
-        <div class="ee-custom-block-title">{{ group.category }}</div>
-        <div class="ee-custom-block-actions">
-          <button
-            v-for="definition in group.blocks"
-            :key="definition.id"
-            type="button"
-            class="ee-pill ee-pill--custom"
-            @click="addCustomBlock(definition)"
-          >
-            Add {{ definition.displayName }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <button
+      v-for="definition in customBlocks"
+      :key="definition.id"
+      type="button"
+      class="ee-pill ee-pill--custom"
+      @click="addCustomBlock(definition)"
+    >
+      Add {{ definition.displayName }}
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import type {
   Block,
   ButtonBlock,
@@ -133,21 +122,6 @@ const addCustomBlock = (definition: CustomBlockDefinition): void => {
   emit("add", createCustomBlockInstance(definition.id));
 };
 
-const customBlockGroups = computed(() => {
-  const grouped = new Map<string, CustomBlockDefinition[]>();
-  for (const definition of customBlocks.value) {
-    const category = definition.category?.trim() || "Uncategorized";
-    const items = grouped.get(category);
-    if (items) {
-      items.push(definition);
-    } else {
-      grouped.set(category, [definition]);
-    }
-  }
-
-  return [...grouped.entries()].map(([category, blocks]) => ({ category, blocks }));
-});
-
 onMounted(() => {
   unsubscribe = subscribeCustomBlockDefinitions((definitions) => {
     customBlocks.value = definitions;
@@ -202,35 +176,5 @@ onBeforeUnmount(() => {
 
 .ee-pill--custom {
   border-style: dashed;
-}
-
-.ee-custom-blocks {
-  flex-basis: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.ee-custom-block-group {
-  border: 1px dashed var(--ee-border);
-  border-radius: 12px;
-  padding: 10px;
-  background: var(--ee-control-bg);
-}
-
-.ee-custom-block-title {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ee-muted);
-  margin-bottom: 6px;
-}
-
-.ee-custom-block-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
 }
 </style>

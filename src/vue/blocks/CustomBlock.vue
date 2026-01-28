@@ -2,7 +2,6 @@
   <div class="ee-block ee-block-custom">
     <div class="ee-custom-header">
       <div class="ee-custom-title">{{ title }}</div>
-      <div class="ee-custom-category">{{ category }}</div>
     </div>
     <div class="ee-custom-preview" v-html="previewHtml"></div>
   </div>
@@ -27,7 +26,6 @@ const definition = ref<CustomBlockDefinition | undefined>(
 let unsubscribe: (() => void) | null = null;
 
 const title = computed(() => definition.value?.displayName ?? props.block.definitionId);
-const category = computed(() => definition.value?.category?.trim() || "Uncategorized");
 const previewHtml = computed(() => renderBlockHtml(props.block, { mode: "preview" }));
 
 onMounted(() => {
@@ -62,13 +60,6 @@ onBeforeUnmount(() => {
 .ee-custom-title {
   font-weight: 700;
   color: var(--ee-text-color);
-}
-
-.ee-custom-category {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ee-muted);
-  font-size: 11px;
 }
 
 .ee-custom-preview {
