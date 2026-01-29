@@ -26,6 +26,18 @@
       </div>
 
       <div class="ee-control-group">
+        <label>Font size</label>
+        <input
+          type="number"
+          :min="FONT_SIZE_MIN_PX"
+          :max="FONT_SIZE_MAX_PX"
+          step="1"
+          :value="block.fontSize ?? DEFAULT_FONT_SIZE_PX"
+          @input="updateFontSize"
+        />
+      </div>
+
+      <div class="ee-control-group">
         <label>Alignment</label>
         <div class="ee-align-options">
           <button
@@ -57,6 +69,11 @@
 
 <script setup lang="ts">
 import type { BlockAlign, TextBlock } from "../../core/types";
+import {
+  DEFAULT_FONT_SIZE_PX,
+  FONT_SIZE_MAX_PX,
+  FONT_SIZE_MIN_PX
+} from "../../core/validation";
 
 const props = defineProps<{
   block: TextBlock;
@@ -77,6 +94,23 @@ const updateAlign = (align: BlockAlign) => {
   emit("update", {
     ...props.block,
     align
+  });
+};
+
+const updateFontSize = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (input.value.trim() === "") {
+    emit("update", {
+      ...props.block,
+      fontSize: undefined
+    });
+    return;
+  }
+
+  const value = Number(input.value);
+  emit("update", {
+    ...props.block,
+    fontSize: Number.isFinite(value) ? value : DEFAULT_FONT_SIZE_PX
   });
 };
 </script>
@@ -102,6 +136,15 @@ const updateAlign = (align: BlockAlign) => {
   font-size: 12px;
   color: #6b7280;
   margin-bottom: 4px;
+}
+
+.ee-control-group input[type="number"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
 }
 
 .ee-toolbar-row {

@@ -14,6 +14,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { ButtonBlock } from "../../core/types";
+import { DEFAULT_FONT_SIZE_PX } from "../../core/validation";
 
 const props = defineProps<{
   block: ButtonBlock;
@@ -46,7 +47,7 @@ const buttonStyle = computed(() => {
     display: "inline-block",
     textDecoration: "none",
     fontFamily: "Helvetica, Arial, sans-serif",
-    fontSize: "16px",
+    fontSize: `${props.block.fontSize ?? DEFAULT_FONT_SIZE_PX}px`,
     lineHeight: "1.5",
     cursor: "pointer"
   };

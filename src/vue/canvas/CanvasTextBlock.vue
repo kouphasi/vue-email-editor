@@ -17,6 +17,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch, nextTick } from "vue";
 import type { TextBlock } from "../../core/types";
+import { DEFAULT_FONT_SIZE_PX } from "../../core/validation";
 import { adjustRunsForTextChange, applyBoldToggle, applyColor } from "../../core/text_formatting";
 
 const props = defineProps<{
@@ -42,7 +43,8 @@ const isEditable = computed(() => props.editing);
 
 const containerStyle = computed(() => {
   return {
-    textAlign: props.block.align ?? "left"
+    textAlign: props.block.align ?? "left",
+    fontSize: `${props.block.fontSize ?? DEFAULT_FONT_SIZE_PX}px`
   };
 });
 

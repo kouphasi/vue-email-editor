@@ -29,6 +29,7 @@ export interface TextBlock extends BlockBase {
   type: "text";
   text: string;
   runs: TextRun[];
+  fontSize?: number;
   align?: BlockAlign;
 }
 
@@ -41,6 +42,7 @@ export interface ButtonBlock extends BlockBase {
   shape: ButtonShape;
   textColor: string;
   backgroundColor: string;
+  fontSize?: number;
   align?: BlockAlign;
 }
 

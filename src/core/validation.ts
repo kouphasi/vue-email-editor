@@ -1,6 +1,9 @@
 import { TextRun } from "./types";
 
 const HEX_COLOR_REGEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+export const FONT_SIZE_MIN_PX = 8;
+export const FONT_SIZE_MAX_PX = 72;
+export const DEFAULT_FONT_SIZE_PX = 16;
 
 export function isValidHttpUrl(value: string): boolean {
   if (!value) {
@@ -48,4 +51,16 @@ export function areTextRunsValid(text: string, runs: TextRun[]): boolean {
   }
 
   return true;
+}
+
+export function isValidFontSize(value: number | undefined): boolean {
+  if (value === undefined) {
+    return true;
+  }
+
+  return (
+    Number.isFinite(value) &&
+    value >= FONT_SIZE_MIN_PX &&
+    value <= FONT_SIZE_MAX_PX
+  );
 }

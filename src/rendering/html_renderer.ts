@@ -9,6 +9,7 @@ import {
   TextBlock
 } from "../core/types";
 import { getCustomBlockDefinition } from "../core/custom_block_registry";
+import { DEFAULT_FONT_SIZE_PX } from "../core/validation";
 
 const escapeHtml = (value: string): string => {
   return value
@@ -73,13 +74,15 @@ const renderTextRuns = (text: string, runs: TextBlock["runs"]): string => {
 const renderTextBlock = (block: TextBlock): string => {
   const align = sanitizeAlign(block.align, "left");
   const content = renderTextRuns(block.text, block.runs);
-  return `<div style=\"text-align:${align};font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#1b1b1b;margin:0 0 12px 0;\">${content}</div>`;
+  const fontSize = block.fontSize ?? DEFAULT_FONT_SIZE_PX;
+  return `<div style=\"text-align:${align};font-family:Helvetica,Arial,sans-serif;font-size:${fontSize}px;line-height:1.6;color:#1b1b1b;margin:0 0 12px 0;\">${content}</div>`;
 };
 
 const renderButtonBlock = (block: ButtonBlock): string => {
   const align = sanitizeAlign(block.align, "left");
   const radius = block.shape === "pill" ? 999 : block.shape === "rounded" ? 8 : 0;
   const label = escapeHtml(block.label);
+  const fontSize = block.fontSize ?? DEFAULT_FONT_SIZE_PX;
   const styles = [
     "display:inline-block",
     `background-color:${block.backgroundColor}`,
@@ -87,7 +90,7 @@ const renderButtonBlock = (block: ButtonBlock): string => {
     `border-radius:${radius}px`,
     "text-decoration:none",
     "font-family:Helvetica,Arial,sans-serif",
-    "font-size:16px",
+    `font-size:${fontSize}px`,
     "padding:12px 20px"
   ];
 

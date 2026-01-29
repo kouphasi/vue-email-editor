@@ -24,6 +24,18 @@
       </div>
 
       <div class="ee-control-group">
+        <label>Font size</label>
+        <input
+          type="number"
+          :min="FONT_SIZE_MIN_PX"
+          :max="FONT_SIZE_MAX_PX"
+          step="1"
+          :value="block.fontSize ?? DEFAULT_FONT_SIZE_PX"
+          @input="updateFontSize"
+        />
+      </div>
+
+      <div class="ee-control-group">
         <label>Shape</label>
         <div class="ee-shape-options">
           <button
@@ -94,6 +106,11 @@
 
 <script setup lang="ts">
 import type { BlockAlign, ButtonBlock, ButtonShape } from "../../core/types";
+import {
+  DEFAULT_FONT_SIZE_PX,
+  FONT_SIZE_MAX_PX,
+  FONT_SIZE_MIN_PX
+} from "../../core/validation";
 
 const props = defineProps<{
   block: ButtonBlock;
@@ -113,6 +130,23 @@ const updateLabel = (event: Event) => {
 const updateUrl = (event: Event) => {
   const input = event.target as HTMLInputElement;
   emit("update", { ...props.block, url: input.value });
+};
+
+const updateFontSize = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (input.value.trim() === "") {
+    emit("update", {
+      ...props.block,
+      fontSize: undefined
+    });
+    return;
+  }
+
+  const value = Number(input.value);
+  emit("update", {
+    ...props.block,
+    fontSize: Number.isFinite(value) ? value : DEFAULT_FONT_SIZE_PX
+  });
 };
 
 const updateShape = (shape: ButtonShape) => {
@@ -158,7 +192,8 @@ const updateAlign = (align: BlockAlign) => {
 }
 
 .ee-control-group input[type="text"],
-.ee-control-group input[type="url"] {
+.ee-control-group input[type="url"],
+.ee-control-group input[type="number"] {
   width: 100%;
   padding: 8px;
   border: 1px solid #d1d5db;

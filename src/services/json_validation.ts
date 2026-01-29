@@ -12,7 +12,12 @@ import {
 } from "../core/types";
 import { getCustomBlockDefinition } from "../core/custom_block_registry";
 import { validateSettingsSchema } from "../core/custom_block_validation";
-import { areTextRunsValid, isValidHexColor, isValidHttpUrl } from "../core/validation";
+import {
+  areTextRunsValid,
+  isValidFontSize,
+  isValidHexColor,
+  isValidHttpUrl
+} from "../core/validation";
 
 const BLOCK_ALIGNS: BlockAlign[] = ["left", "center", "right"];
 
@@ -45,6 +50,10 @@ const validateTextBlock = (block: TextBlock): string[] => {
     errors.push(`Invalid text alignment in block ${block.id}`);
   }
 
+  if (!isValidFontSize(block.fontSize)) {
+    errors.push(`Invalid text font size in block ${block.id}`);
+  }
+
   return errors;
 };
 
@@ -61,6 +70,10 @@ const validateButtonBlock = (block: ButtonBlock): string[] => {
 
   if (!isBlockAlignValid(block.align)) {
     errors.push(`Invalid button alignment in block ${block.id}`);
+  }
+
+  if (!isValidFontSize(block.fontSize)) {
+    errors.push(`Invalid button font size in block ${block.id}`);
   }
 
   return errors;

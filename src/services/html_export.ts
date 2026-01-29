@@ -6,7 +6,12 @@ import {
 } from "../core/types";
 import { getCustomBlockDefinition } from "../core/custom_block_registry";
 import { validateSettingsSchema } from "../core/custom_block_validation";
-import { areTextRunsValid, isValidHexColor, isValidHttpUrl } from "../core/validation";
+import {
+  areTextRunsValid,
+  isValidFontSize,
+  isValidHexColor,
+  isValidHttpUrl
+} from "../core/validation";
 import { renderBlockHtml } from "../rendering/html_renderer";
 import { wrapEmailHtml } from "../rendering/html_templates";
 
@@ -29,6 +34,10 @@ const validateForExport = (document: Document): string[] => {
           break;
         }
       }
+
+      if (!isValidFontSize(block.fontSize)) {
+        errors.push(`Invalid text font size for block ${block.id}`);
+      }
     }
 
     if (block.type === "button") {
@@ -38,6 +47,10 @@ const validateForExport = (document: Document): string[] => {
 
       if (!isValidHexColor(block.textColor) || !isValidHexColor(block.backgroundColor)) {
         errors.push(`Invalid button colors for block ${block.id}`);
+      }
+
+      if (!isValidFontSize(block.fontSize)) {
+        errors.push(`Invalid button font size for block ${block.id}`);
       }
     }
 

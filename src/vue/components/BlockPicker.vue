@@ -52,6 +52,7 @@ import type {
   TextBlock
 } from "../../core/types";
 import { subscribeCustomBlockDefinitions } from "../../core/custom_block_registry";
+import { DEFAULT_FONT_SIZE_PX } from "../../core/validation";
 import { createCustomBlockInstance } from "../../services/document_service";
 
 const emit = defineEmits<{
@@ -73,7 +74,8 @@ const createTextBlock = (): TextBlock => ({
   id: createId(),
   type: "text",
   text: "New text",
-  runs: []
+  runs: [],
+  fontSize: DEFAULT_FONT_SIZE_PX
 });
 
 const createButtonBlock = (): ButtonBlock => ({
@@ -83,7 +85,8 @@ const createButtonBlock = (): ButtonBlock => ({
   url: "https://example.com",
   shape: "rounded",
   textColor: "#ffffff",
-  backgroundColor: "#2b6cb0"
+  backgroundColor: "#2b6cb0",
+  fontSize: DEFAULT_FONT_SIZE_PX
 });
 
 const createImageBlock = (): ImageBlock => ({

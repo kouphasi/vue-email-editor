@@ -13,6 +13,7 @@
       ref="contentRef"
       class="ee-text-content"
       contenteditable="true"
+      :style="contentStyle"
       @input="handleInput"
       @compositionstart="isComposing = true"
       @compositionend="onCompositionEnd"
@@ -24,6 +25,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import type { TextBlock } from "../../core/types";
 import { adjustRunsForTextChange, applyBoldToggle, applyColor } from "../../core/text_formatting";
+import { DEFAULT_FONT_SIZE_PX } from "../../core/validation";
 
 const props = defineProps<{
   block: TextBlock;
@@ -261,6 +263,12 @@ const applyColorSelection = (event: Event): void => {
 
 const currentColor = computed(() => {
   return props.block.runs.find((run) => run.color)?.color ?? "#000000";
+});
+
+const contentStyle = computed(() => {
+  return {
+    fontSize: `${props.block.fontSize ?? DEFAULT_FONT_SIZE_PX}px`
+  };
 });
 
 onMounted(updateHtml);
