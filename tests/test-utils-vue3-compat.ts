@@ -4,21 +4,25 @@ import {
   config
 } from "@vue/test-utils-vue3";
 
-type AnyRecord = Record<string, any>;
+type UnknownRecord = Record<string, unknown>;
+type MountOptions = Parameters<typeof baseMount>[1];
 
-const normalizeOptions = (options?: AnyRecord): AnyRecord | undefined => {
-  if (!options || !("propsData" in options)) {
+const normalizeOptions = (options?: MountOptions): MountOptions | undefined => {
+  if (!options || typeof options !== "object" || !("propsData" in options)) {
     return options;
   }
 
-  const { propsData, ...rest } = options;
-  return {
-    ...rest,
-    props: {
-      ...(rest.props as AnyRecord | undefined),
-      ...(propsData as AnyRecord)
-    }
+  const { propsData, ...rest } = options as UnknownRecord & { propsData?: unknown; props?: unknown };
+  const restRecord = rest as UnknownRecord;
+  const mergedProps: UnknownRecord = {
+    ...(typeof restRecord.props === "object" && restRecord.props ? (restRecord.props as UnknownRecord) : {}),
+    ...(typeof propsData === "object" && propsData ? (propsData as UnknownRecord) : {})
   };
+
+  return {
+    ...(rest as MountOptions),
+    props: mergedProps
+  } as MountOptions;
 };
 
 const withDestroy = <T extends { destroy?: () => void; unmount?: () => void }>(wrapper: T): T => {
@@ -28,9 +32,9 @@ const withDestroy = <T extends { destroy?: () => void; unmount?: () => void }>(w
   return wrapper;
 };
 
-export const mount = (component: any, options?: AnyRecord) =>
-  withDestroy(baseMount(component, normalizeOptions(options) as any));
-export const shallowMount = (component: any, options?: AnyRecord) =>
-  withDestroy(baseShallowMount(component, normalizeOptions(options) as any));
+export const mount: typeof baseMount = (component, options) =>
+  withDestroy(baseMount(component, normalizeOptions(options)));
+export const shallowMount: typeof baseShallowMount = (component, options) =>
+  withDestroy(baseShallowMount(component, normalizeOptions(options)));
 
 export { config };
