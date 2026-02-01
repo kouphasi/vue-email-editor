@@ -192,7 +192,3 @@ pnpm run typecheck
 ## Contributing
 
 Issues and pull requests are welcome. Please run tests and linting before submitting.
-
-## License
-
-Not specified yet. Add a LICENSE file before publishing publicly.
