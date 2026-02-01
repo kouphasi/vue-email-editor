@@ -200,6 +200,14 @@ const handleDragStart = (id: string, event: DragEvent) => {
   if (event.dataTransfer) {
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", id);
+    const handle = event.currentTarget as HTMLElement | null;
+    const blockElement = handle?.closest(".ee-canvas-block") as HTMLElement | null;
+    if (blockElement) {
+      const rect = blockElement.getBoundingClientRect();
+      const offsetX = Math.max(0, event.clientX - rect.left);
+      const offsetY = Math.max(0, event.clientY - rect.top);
+      event.dataTransfer.setDragImage(blockElement, offsetX, offsetY);
+    }
   }
 };
 
