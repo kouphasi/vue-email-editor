@@ -1,14 +1,31 @@
-# Email Editor Library
+# Email Editor
 
-A block-based email editor library for Vue 2.7.
+Block-based email editor library for Vue 2.7 / Vue 3.
+
+## Features
+
+- Block-based editing (text, button, image, HTML, custom)
+- JSON document model with validation
+- HTML export for email delivery
+- Custom blocks with schema, defaults, validation, and HTML rendering
+- Preview modes (mobile/desktop) and image upload hook
+
+## Requirements
+
+- Vue 2.7 or Vue 3 (peer dependency: vue ^2.7 || ^3.0)
+- Modern browser with File/Blob APIs
 
 ## Install
 
 ```bash
 npm install email-editor
+# or
+pnpm add email-editor
+# or
+yarn add email-editor
 ```
 
-## Usage (Vue 2.7)
+## Quick Start (Vue 3)
 
 ```vue
 <script setup lang="ts">
@@ -32,13 +49,87 @@ const handleImageUpload = async (file: File) => {
 </template>
 ```
 
-## Notes
+## Vue 2.7 Usage
 
-- `json` is a JSON string representation of the document.
-- Use `update:json` to keep your local state in sync.
-- You can pass a `document` object instead of `json` if you want to own state externally; handle `change` to capture edits.
+Use the Vue 2.7 build via the subpath import:
 
-## Custom blocks
+```ts
+import EmailEditor, { exportHtml } from "email-editor/vue2";
+```
+
+## Component API
+
+### Props
+
+- `json?: string`
+  - JSON string representation of the `Document`.
+  - If `document` is also provided, `document` takes precedence.
+- `document?: Document | null`
+  - Document object to load. Use `@change` to capture edits.
+- `previewMode?: "mobile" | "desktop"`
+  - Initial preview mode. Default: `"mobile"`.
+- `onImageUpload?: (file: File) => Promise<string>`
+  - Called when an image is uploaded. Return a public URL.
+
+### Events
+
+- `update:json` (value: string)
+  - Emitted when the document changes.
+- `change` (value: Document)
+  - Emitted when the document changes.
+- `error` (value: Error)
+  - Emitted when JSON parsing or validation fails.
+
+### Exposed Methods
+
+```ts
+// via template ref
+loadJson(json: string): void
+loadDocument(doc: Document): void
+exportJson(): string
+exportHtml(): string
+```
+
+## Data Model
+
+```ts
+interface Document {
+  id: string;
+  blocks: Block[];
+  layout: {
+    previewMode: "mobile" | "desktop";
+    previewWidthPx: 375 | 640;
+  };
+}
+```
+
+Built-in block types: `text`, `button`, `image`, `html`, `custom`.
+
+## Programmatic API
+
+Vue 2.7 users should import from `email-editor/vue2`.
+
+```ts
+import {
+  exportHtml,
+  parseDocument,
+  serializeDocument,
+  validateDocument,
+  createCustomBlockInstance,
+  registerCustomBlock,
+  getCustomBlockDefinition,
+  listCustomBlockDefinitions,
+  subscribeCustomBlockDefinitions,
+  DuplicateCustomBlockDefinitionError
+} from "email-editor";
+```
+
+- `parseDocument(json)`: JSON string -> `Document`
+- `serializeDocument(doc)`: `Document` -> JSON string
+- `validateDocument(doc)`: validate a `Document`
+- `exportHtml(doc)`: render final HTML for email delivery
+
+## Custom Blocks
 
 Register custom blocks to appear in the picker and render with your own HTML.
 
@@ -52,7 +143,6 @@ import {
 registerCustomBlock({
   id: "hero",
   displayName: "Hero",
-  category: "Marketing",
   settingsSchema: {
     fields: [
       { key: "headline", label: "Headline", type: "string", required: true, default: "Hello" },
@@ -67,7 +157,7 @@ registerCustomBlock({
     return { ok: missingFields.length === 0, missingFields };
   },
   renderHtml(config) {
-    return `<div class=\"hero\"><h1>${config.headline}</h1><a href=\"${config.ctaUrl}\">Learn more</a></div>`;
+    return `<div class="hero"><h1>${config.headline}</h1><a href="${config.ctaUrl}">Learn more</a></div>`;
   }
 });
 
@@ -79,12 +169,30 @@ const documentJson = serializeDocument({
 });
 ```
 
-Settings schema field types: `string`, `number`, `boolean`, `color`, `select`, `url`, `html`, `richtext`.
+Settings field types: `string`, `number`, `boolean`, `color`, `select`, `url`, `html`, `richtext`.
 
-## Scripts
+## Demos
 
-- `npm run dev`
-- `npm run build`
-- `npm test`
-- `npm run lint`
-- `npm run typecheck`
+```bash
+pnpm run demo
+pnpm run demo:vue3
+```
+
+## Development
+
+```bash
+pnpm run dev
+pnpm run build
+pnpm run test
+pnpm run test:vue3
+pnpm run lint
+pnpm run typecheck
+```
+
+## Contributing
+
+Issues and pull requests are welcome. Please run tests and linting before submitting.
+
+## License
+
+Not specified yet. Add a LICENSE file before publishing publicly.
