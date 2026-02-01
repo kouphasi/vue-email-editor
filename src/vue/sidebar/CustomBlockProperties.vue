@@ -187,6 +187,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding: 16px;
 }
 
 .ee-custom-fields {
