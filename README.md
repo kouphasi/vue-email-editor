@@ -1,6 +1,9 @@
-# Email Editor
+# Simple Vue Email Editor
 
 Block-based email editor library for Vue 2.7 / Vue 3.
+<img width="512" height="512" alt="ChatGPT Image 2026年2月1日 22_40_34" src="https://github.com/user-attachments/assets/7c4dc9ce-7d76-4418-8435-eeeafd17966c" />
+
+[demo page](https://simple-vue-email-editor.vercel.app/)
 
 ## Features
 
