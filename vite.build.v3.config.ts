@@ -1,12 +1,13 @@
 import { defineConfig } from "vite";
-import vue2 from "@vitejs/plugin-vue2";
+import vue from "@vitejs/plugin-vue";
+import * as compiler from "@vue/compiler-sfc-vue3";
 
 export default defineConfig({
-  plugins: [vue2()],
+  plugins: [vue({ compiler })],
   build: {
     target: "es2022",
     sourcemap: true,
-    outDir: "dist/vue2",
+    outDir: "dist/vue3",
     lib: {
       entry: "src/index.ts",
       name: "EmailEditor",
@@ -21,14 +22,5 @@ export default defineConfig({
         }
       }
     }
-  },
-  test: {
-    environment: "jsdom",
-    globals: true,
-    include: [
-      "src/**/*.{test,spec}.{ts,tsx,vue}",
-      "tests/**/*.{test,spec}.{ts,tsx,vue}"
-    ],
-    setupFiles: "tests/setup.ts"
   }
 });

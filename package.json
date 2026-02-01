@@ -3,15 +3,17 @@
   "version": "0.1.0",
   "description": "Block-based email editor library for Vue 2.7.",
   "type": "module",
-  "main": "dist/email-editor.iife.js",
-  "module": "dist/email-editor.es.js",
+  "main": "dist/vue3/email-editor.iife.js",
+  "module": "dist/vue3/email-editor.es.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && vite build -c vite.build.v3.config.ts",
+    "build:vue2": "vite build",
+    "build:vue3": "vite build -c vite.build.v3.config.ts",
     "demo": "vite -c demo/vite.config.ts",
     "demo:vue3": "vite -c demo-vue3/vite.config.ts",
     "preview": "vite preview",
@@ -45,12 +47,22 @@
     "vue-tsc": "^2.2.0"
   },
   "peerDependencies": {
-    "vue": "^2.7.0"
+    "vue": "^2.7.0 || ^3.0.0"
   },
   "exports": {
     ".": {
-      "import": "./dist/email-editor.es.js",
-      "require": "./dist/email-editor.iife.js",
+      "import": "./dist/vue3/email-editor.es.js",
+      "require": "./dist/vue3/email-editor.iife.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./vue2": {
+      "import": "./dist/vue2/email-editor.es.js",
+      "require": "./dist/vue2/email-editor.iife.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./vue3": {
+      "import": "./dist/vue3/email-editor.es.js",
+      "require": "./dist/vue3/email-editor.iife.js",
       "types": "./dist/index.d.ts"
     }
   }
