@@ -11,7 +11,6 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build && vite build -c vite.build.v3.config.ts",
     "build:vue2": "vite build",
     "build:vue3": "vite build -c vite.build.v3.config.ts",
     "demo": "vite -c demo/vite.config.ts",
