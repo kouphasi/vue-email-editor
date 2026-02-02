@@ -59,6 +59,7 @@
             @select-cell-block="(cellId, blockId) => handleSelectCellBlock(block.id, cellId, blockId)"
             @cell-block-drag-start="(cellId, blockId, event) => handleCellBlockDragStart(block.id, cellId, blockId, event)"
             @cell-block-drag-end="handleCellBlockDragEnd"
+            @cell-block-delete="(cellId, blockId) => handleCellBlockDelete(block.id, cellId, blockId)"
             @cell-drop="(cellId) => handleCellDrop(block.id, cellId)"
           />
           <CanvasCustomBlock
@@ -112,6 +113,7 @@ const emit = defineEmits<{
   (event: "select-block", blockId: string | null): void;
   (event: "set-editing", isEditing: boolean): void;
   (event: "select-cell-block", tableBlockId: string, cellId: string, blockId: string): void;
+  (event: "delete-cell-block", tableBlockId: string, cellId: string, blockId: string): void;
   (event: "move-block-to-cell", blockIndex: number, tableBlockId: string, cellId: string): void;
   (event: "move-cell-to-top-level", tableBlockId: string, cellId: string, blockId: string, targetIndex: number): void;
   (
@@ -372,17 +374,23 @@ const handleCellBlockDragStart = (
     event.dataTransfer.effectAllowed = "move";
     event.dataTransfer.setData("text/plain", blockId);
     const handle = event.currentTarget as HTMLElement | null;
-    if (handle) {
-      const rect = handle.getBoundingClientRect();
+    const blockElement = handle?.closest(".ee-canvas-block") as HTMLElement | null;
+    const dragTarget = blockElement ?? handle;
+    if (dragTarget) {
+      const rect = dragTarget.getBoundingClientRect();
       const offsetX = Math.max(0, event.clientX - rect.left);
       const offsetY = Math.max(0, event.clientY - rect.top);
-      event.dataTransfer.setDragImage(handle, offsetX, offsetY);
+      event.dataTransfer.setDragImage(dragTarget, offsetX, offsetY);
     }
   }
 };
 
 const handleCellBlockDragEnd = () => {
   resetDragState();
+};
+
+const handleCellBlockDelete = (tableBlockId: string, cellId: string, blockId: string) => {
+  emit("delete-cell-block", tableBlockId, cellId, blockId);
 };
 
 const handleCellDrop = (tableBlockId: string, cellId: string) => {

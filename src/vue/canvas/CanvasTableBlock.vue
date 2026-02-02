@@ -26,21 +26,21 @@
             >
               Empty cell
             </div>
-            <div
+            <CanvasBlock
               v-for="cellBlock in cell.blocks"
               :key="cellBlock.id"
-              class="ee-cell-block-wrapper"
+              class="ee-cell-block-frame"
               :class="{
-                'is-selected': selectedCellBlockId === cellBlock.id,
                 'is-dragging': dragSource?.type === 'cell' && dragSource.blockId === cellBlock.id
               }"
-              draggable="true"
-              @click.stop="handleCellBlockClick(cell.id, cellBlock.id)"
+              :selected="selectedCellBlockId === cellBlock.id"
+              @select="handleCellBlockClick(cell.id, cellBlock.id)"
               @dragstart="handleCellBlockDragStart(cell.id, cellBlock.id, $event)"
               @dragend="handleCellBlockDragEnd"
+              @delete="handleCellBlockDelete(cell.id, cellBlock.id)"
             >
               <div v-html="renderSingleBlock(cellBlock)"></div>
-            </div>
+            </CanvasBlock>
           </td>
         </tr>
       </tbody>
@@ -53,6 +53,7 @@ import { ref, watch } from "vue";
 import type { BlockType, CellBlock, TableBlock, TableCell, TableRow } from "../../core/types";
 import { renderBlockHtml } from "../../rendering/html_renderer";
 import { resolveCellWidths } from "../../core/table_utils";
+import CanvasBlock from "./CanvasBlock.vue";
 
 type DragSource =
   | {
@@ -80,6 +81,7 @@ const emit = defineEmits<{
   (event: "cell-block-drag-start", cellId: string, blockId: string, event: DragEvent): void;
   (event: "cell-block-drag-end"): void;
   (event: "cell-drop", cellId: string): void;
+  (event: "cell-block-delete", cellId: string, blockId: string): void;
 }>();
 
 const dragOverCellId = ref<string | null>(null);
@@ -95,6 +97,10 @@ const handleCellBlockDragStart = (cellId: string, blockId: string, event: DragEv
 
 const handleCellBlockDragEnd = () => {
   emit("cell-block-drag-end");
+};
+
+const handleCellBlockDelete = (cellId: string, blockId: string) => {
+  emit("cell-block-delete", cellId, blockId);
 };
 
 const getCellStyle = (row: TableRow, index: number): Record<string, string> => {
@@ -316,21 +322,11 @@ const renderSingleBlock = (block: CellBlock): string => {
   border-color: #ef4444;
 }
 
-.ee-cell-block-wrapper {
-  cursor: pointer;
-  border-radius: 4px;
-  transition: outline 0.15s ease;
+.ee-cell-block-frame {
+  margin-bottom: 0;
 }
 
-.ee-cell-block-wrapper.is-dragging {
+.ee-cell-block-frame.is-dragging {
   opacity: 0.5;
-}
-
-.ee-cell-block-wrapper:hover {
-  outline: 2px solid #93c5fd;
-}
-
-.ee-cell-block-wrapper.is-selected {
-  outline: 2px solid #2563eb;
 }
 </style>

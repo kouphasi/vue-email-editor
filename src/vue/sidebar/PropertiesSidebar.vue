@@ -11,6 +11,14 @@
       </button>
       <h2 class="ee-sidebar-title">{{ title }}</h2>
       <button
+        v-if="parentTableContext && selectedBlock"
+        class="ee-delete-msg"
+        @click="handleDeleteCellBlock"
+        aria-label="Remove cell block"
+      >
+        Remove
+      </button>
+      <button
         v-if="selectedBlock && !parentTableContext"
         class="ee-close-msg"
         @click="$emit('select-block', null)"
@@ -106,6 +114,7 @@ const emit = defineEmits<{
   (event: "update-layout", layout: LayoutSettings): void;
   (event: "update-block", block: Block): void;
   (event: "update-cell-block", block: CellBlock): void;
+  (event: "delete-cell-block", tableBlockId: string, cellId: string, blockId: string): void;
   (event: "select-block", id: string | null): void;
   (event: "select-cell-block-from-table", tableBlockId: string, cellId: string, blockId: string): void;
   (event: "format-bold"): void;
@@ -142,6 +151,14 @@ const handleBackToTable = () => {
   if (ctx) {
     emit("select-block", ctx.tableBlockId);
   }
+};
+
+const handleDeleteCellBlock = () => {
+  const ctx = parentTableContext.value;
+  if (!ctx || !selectedBlock.value) {
+    return;
+  }
+  emit("delete-cell-block", ctx.tableBlockId, ctx.cellId, selectedBlock.value.id);
 };
 
 const handleCellBlockUpdate = (block: CellBlock) => {
@@ -225,6 +242,19 @@ const customBlockState = computed(() => {
 }
 
 .ee-close-msg:hover {
+  text-decoration: underline;
+}
+
+.ee-delete-msg {
+  font-size: 12px;
+  color: #b91c1c;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.ee-delete-msg:hover {
   text-decoration: underline;
 }
 

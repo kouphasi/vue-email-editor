@@ -39,6 +39,7 @@
           @move-block-to-cell="handleMoveBlockToCell"
           @move-cell-to-top-level="handleMoveCellBlockToTopLevel"
           @move-cell-to-cell="handleMoveCellBlockToCell"
+          @delete-cell-block="handleDeleteCellBlock"
         />
       </div>
       
@@ -50,6 +51,7 @@
           @update-layout="handleUpdateLayout"
           @update-block="handleUpdateBlock"
           @update-cell-block="handleUpdateCellBlock"
+          @delete-cell-block="handleDeleteCellBlock"
           @select-block="handleSelectBlock"
           @select-cell-block-from-table="handleSelectCellBlock"
           @format-bold="handleFormatBold"
@@ -93,6 +95,7 @@ import {
   addBlock,
   createDocument,
   deleteBlock,
+  deleteCellBlock,
   moveBlockToCell,
   moveCellBlockToCell,
   moveCellBlockToTopLevel,
@@ -283,6 +286,26 @@ const handleUpdateCellBlock = (cellBlock: CellBlock): void => {
     rows: updatedRows
   };
   setDocument(updateBlock(documentRef.value, updatedTable.id, () => updatedTable), true);
+};
+
+const handleDeleteCellBlock = (
+  tableBlockId: string,
+  cellId: string,
+  blockId: string
+): void => {
+  const tableBlock = documentRef.value.blocks.find(
+    (b) => b.id === tableBlockId && b.type === "table"
+  ) as TableBlock | undefined;
+  if (!tableBlock) {
+    return;
+  }
+  const updatedTable = deleteCellBlock(tableBlock, cellId, blockId);
+  setDocument(updateBlock(documentRef.value, updatedTable.id, () => updatedTable), true);
+  if (editorState.value.selectedBlockId === blockId) {
+    editorState.value.selectedBlockId = tableBlockId;
+    editorState.value.parentTableContext = null;
+    editorState.value.isEditingText = false;
+  }
 };
 
 const handleMoveBlockToCell = (blockIndex: number, tableBlockId: string, cellId: string) => {

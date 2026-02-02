@@ -97,21 +97,6 @@
               </div>
               <div class="ee-cell-block-edit-hint">Click to edit →</div>
             </div>
-
-            <div class="ee-cell-actions">
-              <button type="button" @click="handleAddCellBlock(cell.id, 'text')">
-                {{ cell.blocks.length === 0 ? "Add text" : "Replace with text" }}
-              </button>
-              <button type="button" @click="handleAddCellBlock(cell.id, 'button')">
-                {{ cell.blocks.length === 0 ? "Add button" : "Replace with button" }}
-              </button>
-              <button type="button" @click="handleAddCellBlock(cell.id, 'image')">
-                {{ cell.blocks.length === 0 ? "Add image" : "Replace with image" }}
-              </button>
-              <button type="button" @click="handleAddCellBlock(cell.id, 'html')">
-                {{ cell.blocks.length === 0 ? "Add html" : "Replace with html" }}
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -120,19 +105,9 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  CellBlock,
-  TableBlock,
-  TableRow,
-  TextBlock as TextBlockType,
-  ButtonBlock as ButtonBlockType,
-  ImageBlock as ImageBlockType,
-  HtmlBlock as HtmlBlockType
-} from "../../core/types";
+import type { CellBlock, TableBlock, TableRow } from "../../core/types";
 import type { ImageUploadHandler } from "../../core/editor_api";
-import { DEFAULT_FONT_SIZE_PX } from "../../core/validation";
 import {
-  replaceBlockInCell,
   addRowToTable,
   deleteCellBlock,
   deleteRowFromTable,
@@ -164,13 +139,6 @@ const getPreviewText = (text: string): string => {
 };
 
 const columnOptions = [1, 2, 3, 4];
-
-const createId = (): string => {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `block_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-};
 
 const splitEvenly = (total: number, count: number): number[] => {
   if (count <= 0) {
@@ -258,61 +226,6 @@ const handleCellWidthChange = (row: TableRow, cellIndex: number, event: Event) =
     ...props.block,
     rows
   });
-};
-
-const createTextBlock = (): TextBlockType => ({
-  id: createId(),
-  type: "text",
-  text: "New text",
-  runs: [],
-  fontSize: DEFAULT_FONT_SIZE_PX
-});
-
-const createButtonBlock = (): ButtonBlockType => ({
-  id: createId(),
-  type: "button",
-  label: "Button",
-  url: "https://example.com",
-  shape: "rounded",
-  textColor: "#ffffff",
-  backgroundColor: "#2b6cb0",
-  fontSize: DEFAULT_FONT_SIZE_PX
-});
-
-const createImageBlock = (): ImageBlockType => ({
-  id: createId(),
-  type: "image",
-  url: "",
-  status: "pending",
-  display: {
-    align: "center"
-  }
-});
-
-const createHtmlBlock = (): HtmlBlockType => ({
-  id: createId(),
-  type: "html",
-  content: ""
-});
-
-const handleAddCellBlock = (cellId: string, type: "text" | "button" | "image" | "html") => {
-  let nextBlock: CellBlock;
-  switch (type) {
-    case "text":
-      nextBlock = createTextBlock();
-      break;
-    case "button":
-      nextBlock = createButtonBlock();
-      break;
-    case "image":
-      nextBlock = createImageBlock();
-      break;
-    case "html":
-      nextBlock = createHtmlBlock();
-      break;
-  }
-
-  emit("update", replaceBlockInCell(props.block, cellId, nextBlock));
 };
 
 const handleDeleteCellBlock = (cellId: string, blockId: string) => {
@@ -514,18 +427,4 @@ const getBlockLabel = (block: CellBlock): string => {
   text-align: right;
 }
 
-.ee-cell-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.ee-cell-actions button {
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  border-radius: 6px;
-  padding: 6px 8px;
-  font-size: 12px;
-  cursor: pointer;
-}
 </style>
