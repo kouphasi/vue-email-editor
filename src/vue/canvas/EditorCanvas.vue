@@ -14,7 +14,7 @@
           'is-drag-over-top': dragOverId === block.id && dragOverPosition === 'top',
           'is-drag-over-bottom': dragOverId === block.id && dragOverPosition === 'bottom'
         }"
-        @dragover.prevent="handleDragOver(block.id)"
+        @dragover.prevent="handleDragOver(block.id, $event)"
         @dragleave="handleDragLeave(block.id)"
         @drop.prevent="handleDrop(block.id)"
       >
@@ -265,7 +265,7 @@ const handleDragStart = (block: Block, index: number, event: DragEvent) => {
   }
 };
 
-const handleDragOver = (id: string) => {
+const handleDragOver = (id: string, event: DragEvent) => {
   if (!dragSource.value) {
     return;
   }
@@ -283,7 +283,11 @@ const handleDragOver = (id: string) => {
     dragOverPosition.value = fromIndex < toIndex ? "bottom" : "top";
     return;
   }
-  dragOverPosition.value = "top";
+  // セルからのドラッグ時はマウス位置で判定
+  const target = event.currentTarget as HTMLElement;
+  const rect = target.getBoundingClientRect();
+  const midY = rect.top + rect.height / 2;
+  dragOverPosition.value = event.clientY < midY ? "top" : "bottom";
 };
 
 const handleDragLeave = (id: string) => {
@@ -312,7 +316,8 @@ const handleDrop = (id: string) => {
   }
 
   if (source.type === "cell") {
-    emit("move-cell-to-top-level", source.tableBlockId, source.cellId, source.blockId, toIndex);
+    const adjustedIndex = dragOverPosition.value === "bottom" ? toIndex + 1 : toIndex;
+    emit("move-cell-to-top-level", source.tableBlockId, source.cellId, source.blockId, adjustedIndex);
     resetDragState();
     return;
   }
