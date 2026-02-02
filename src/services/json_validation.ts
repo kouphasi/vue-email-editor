@@ -2,12 +2,15 @@ import {
   Block,
   BlockAlign,
   ButtonBlock,
+  CellBlock,
   CustomBlockDefinition,
   CustomBlockInstance,
   Document,
   HtmlBlock,
   ImageBlock,
   LayoutSettings,
+  TableBlock,
+  TableRow,
   TextBlock
 } from "../core/types";
 import { getCustomBlockDefinition } from "../core/custom_block_registry";
@@ -104,6 +107,139 @@ const validateHtmlBlock = (block: HtmlBlock): string[] => {
 
   if (typeof block.content !== "string") {
     errors.push(`Invalid html content in block ${block.id}`);
+  }
+
+  return errors;
+};
+
+const TABLE_COLUMN_MIN = 1;
+const TABLE_COLUMN_MAX = 4;
+const WIDTH_EPSILON = 0.01;
+
+const isValidWidthPercent = (value: unknown): value is number => {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 && value <= 100;
+};
+
+const validateTableRowWidths = (
+  row: TableRow,
+  columnCount: number,
+  blockId: string
+): string[] => {
+  const errors: string[] = [];
+
+  if (row.cells.length !== columnCount) {
+    errors.push(
+      `Table block ${blockId} row ${row.id} has ${row.cells.length} cells (expected ${columnCount})`
+    );
+    return errors;
+  }
+
+  let definedCount = 0;
+  let sum = 0;
+
+  for (const cell of row.cells) {
+    if (cell.widthPercent === undefined) {
+      continue;
+    }
+    if (!isValidWidthPercent(cell.widthPercent)) {
+      errors.push(`Table block ${blockId} cell ${cell.id} has invalid width`);
+      continue;
+    }
+    definedCount += 1;
+    sum += cell.widthPercent;
+  }
+
+  if (sum > 100 + WIDTH_EPSILON) {
+    errors.push(`Table block ${blockId} row ${row.id} width exceeds 100%`);
+  }
+
+  const missing = row.cells.length - definedCount;
+  if (missing === 0 && Math.abs(sum - 100) > WIDTH_EPSILON) {
+    errors.push(`Table block ${blockId} row ${row.id} width must total 100%`);
+  }
+
+  if (missing > 0 && sum >= 100 - WIDTH_EPSILON) {
+    errors.push(`Table block ${blockId} row ${row.id} width leaves no space for missing cells`);
+  }
+
+  return errors;
+};
+
+const validateCellBlock = (block: CellBlock, tableId: string): string[] => {
+  switch (block.type) {
+    case "text":
+      return validateTextBlock(block);
+    case "button":
+      return validateButtonBlock(block);
+    case "image":
+      return validateImageBlock(block);
+    case "html":
+      return validateHtmlBlock(block);
+    default:
+      return [`Table block ${tableId} has invalid cell block type ${(block as Block).type}`];
+  }
+};
+
+const validateTableBlock = (block: TableBlock): string[] => {
+  const errors: string[] = [];
+
+  if (
+    !Number.isInteger(block.columnCount) ||
+    block.columnCount < TABLE_COLUMN_MIN ||
+    block.columnCount > TABLE_COLUMN_MAX
+  ) {
+    errors.push(`Table block ${block.id} has invalid column count`);
+  }
+
+  if (!Array.isArray(block.rows) || block.rows.length === 0) {
+    errors.push(`Table block ${block.id} must include at least one row`);
+    return errors;
+  }
+
+  if (block.cellPadding !== undefined) {
+    if (!Number.isFinite(block.cellPadding) || block.cellPadding < 0) {
+      errors.push(`Table block ${block.id} has invalid cell padding`);
+    }
+  }
+
+  for (const row of block.rows) {
+    if (!row.id) {
+      errors.push(`Table block ${block.id} has row with missing id`);
+    }
+
+    if (!Array.isArray(row.cells)) {
+      errors.push(`Table block ${block.id} row ${row.id} has invalid cells`);
+      continue;
+    }
+
+    errors.push(...validateTableRowWidths(row, block.columnCount, block.id));
+
+    for (const cell of row.cells) {
+      if (!cell.id) {
+        errors.push(`Table block ${block.id} has cell with missing id`);
+      }
+
+      if (!Array.isArray(cell.blocks)) {
+        errors.push(`Table block ${block.id} cell ${cell.id} has invalid blocks`);
+        continue;
+      }
+      if (cell.blocks.length > 1) {
+        errors.push(`Table block ${block.id} cell ${cell.id} has multiple blocks`);
+      }
+
+      for (const cellBlock of cell.blocks) {
+        if (
+          cellBlock.type !== "text" &&
+          cellBlock.type !== "button" &&
+          cellBlock.type !== "image" &&
+          cellBlock.type !== "html"
+        ) {
+          errors.push(`Table block ${block.id} cell ${cell.id} has invalid block type`);
+          continue;
+        }
+        errors.push(...validateCellBlock(cellBlock, block.id));
+      }
+    }
   }
 
   return errors;
@@ -217,6 +353,8 @@ const validateBlock = (block: Block): string[] => {
       return validateHtmlBlock(block);
     case "custom":
       return validateCustomBlock(block);
+    case "table":
+      return validateTableBlock(block);
     default:
       return [`Unknown block type for block ${(block as Block).id}`];
   }

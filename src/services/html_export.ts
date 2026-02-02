@@ -2,6 +2,11 @@ import {
   CustomBlockDefinition,
   CustomBlockInstance,
   Document,
+  TableBlock,
+  TextBlock,
+  ButtonBlock,
+  ImageBlock,
+  CellBlock,
   ValidationResult
 } from "../core/types";
 import { getCustomBlockDefinition } from "../core/custom_block_registry";
@@ -24,44 +29,145 @@ const validateForExport = (document: Document): string[] => {
 
   for (const block of document.blocks) {
     if (block.type === "text") {
-      if (!areTextRunsValid(block.text, block.runs)) {
-        errors.push(`Invalid text runs for block ${block.id}`);
+      errors.push(...validateTextBlockForExport(block));
+    } else if (block.type === "button") {
+      errors.push(...validateButtonBlockForExport(block));
+    } else if (block.type === "image") {
+      errors.push(...validateImageBlockForExport(block));
+    } else if (block.type === "table") {
+      errors.push(...validateTableBlockForExport(block));
+    }
+  }
+
+  return errors;
+};
+
+const validateTextBlockForExport = (block: TextBlock): string[] => {
+  const errors: string[] = [];
+  if (!areTextRunsValid(block.text, block.runs)) {
+    errors.push(`Invalid text runs for block ${block.id}`);
+  }
+
+  for (const run of block.runs) {
+    if (!isValidHexColor(run.color)) {
+      errors.push(`Invalid text color for block ${block.id}`);
+      break;
+    }
+  }
+
+  if (!isValidFontSize(block.fontSize)) {
+    errors.push(`Invalid text font size for block ${block.id}`);
+  }
+
+  return errors;
+};
+
+const validateButtonBlockForExport = (block: ButtonBlock): string[] => {
+  const errors: string[] = [];
+  if (!isValidHttpUrl(block.url)) {
+    errors.push(`Invalid button URL for block ${block.id}`);
+  }
+
+  if (!isValidHexColor(block.textColor) || !isValidHexColor(block.backgroundColor)) {
+    errors.push(`Invalid button colors for block ${block.id}`);
+  }
+
+  if (!isValidFontSize(block.fontSize)) {
+    errors.push(`Invalid button font size for block ${block.id}`);
+  }
+
+  return errors;
+};
+
+const validateImageBlockForExport = (block: ImageBlock): string[] => {
+  const errors: string[] = [];
+  if (!isValidHttpUrl(block.url)) {
+    errors.push(`Invalid image URL for block ${block.id}`);
+  }
+
+  if (block.status !== "ready") {
+    errors.push(`Image block ${block.id} is not ready for export`);
+  }
+
+  return errors;
+};
+
+const validateCellBlockForExport = (block: CellBlock, tableId: string): string[] => {
+  switch (block.type) {
+    case "text":
+      return validateTextBlockForExport(block);
+    case "button":
+      return validateButtonBlockForExport(block);
+    case "image":
+      return validateImageBlockForExport(block);
+    case "html":
+      return [];
+    default:
+      return [`Table block ${tableId} has invalid cell block type ${(block as CellBlock).type}`];
+  }
+};
+
+const validateTableBlockForExport = (block: TableBlock): string[] => {
+  const errors: string[] = [];
+  if (
+    !Number.isInteger(block.columnCount) ||
+    block.columnCount < 1 ||
+    block.columnCount > 4
+  ) {
+    errors.push(`Table block ${block.id} has invalid column count`);
+  }
+
+  if (!Array.isArray(block.rows) || block.rows.length === 0) {
+    errors.push(`Table block ${block.id} must include at least one row`);
+    return errors;
+  }
+
+    for (const row of block.rows) {
+      if (!Array.isArray(row.cells) || row.cells.length !== block.columnCount) {
+        errors.push(`Table block ${block.id} has invalid row structure`);
+        continue;
       }
 
-      for (const run of block.runs) {
-        if (!isValidHexColor(run.color)) {
-          errors.push(`Invalid text color for block ${block.id}`);
-          break;
+      let sum = 0;
+      let definedCount = 0;
+      for (const cell of row.cells) {
+        if (cell.blocks.length > 1) {
+          errors.push(`Table block ${block.id} cell ${cell.id} has multiple blocks`);
+        }
+        if (cell.widthPercent !== undefined) {
+          if (
+            typeof cell.widthPercent !== "number" ||
+          !Number.isFinite(cell.widthPercent) ||
+          cell.widthPercent <= 0 ||
+          cell.widthPercent > 100
+        ) {
+          errors.push(`Table block ${block.id} cell ${cell.id} has invalid width`);
+        } else {
+          sum += cell.widthPercent;
+          definedCount += 1;
         }
       }
 
-      if (!isValidFontSize(block.fontSize)) {
-        errors.push(`Invalid text font size for block ${block.id}`);
+      for (const cellBlock of cell.blocks) {
+        if (
+          cellBlock.type !== "text" &&
+          cellBlock.type !== "button" &&
+          cellBlock.type !== "image" &&
+          cellBlock.type !== "html"
+        ) {
+          errors.push(`Table block ${block.id} cell ${cell.id} has invalid block type`);
+          continue;
+        }
+        errors.push(...validateCellBlockForExport(cellBlock, block.id));
       }
     }
 
-    if (block.type === "button") {
-      if (!isValidHttpUrl(block.url)) {
-        errors.push(`Invalid button URL for block ${block.id}`);
-      }
-
-      if (!isValidHexColor(block.textColor) || !isValidHexColor(block.backgroundColor)) {
-        errors.push(`Invalid button colors for block ${block.id}`);
-      }
-
-      if (!isValidFontSize(block.fontSize)) {
-        errors.push(`Invalid button font size for block ${block.id}`);
-      }
+    if (definedCount === row.cells.length && Math.abs(sum - 100) > 0.01) {
+      errors.push(`Table block ${block.id} row ${row.id} width must total 100%`);
     }
 
-    if (block.type === "image") {
-      if (!isValidHttpUrl(block.url)) {
-        errors.push(`Invalid image URL for block ${block.id}`);
-      }
-
-      if (block.status !== "ready") {
-        errors.push(`Image block ${block.id} is not ready for export`);
-      }
+    if (definedCount < row.cells.length && sum >= 100) {
+      errors.push(`Table block ${block.id} row ${row.id} width leaves no space for missing cells`);
     }
   }
 

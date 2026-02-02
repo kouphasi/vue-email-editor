@@ -5,10 +5,14 @@ export default EmailEditor;
 export type {
   Document,
   Block,
+  CellBlock,
   TextBlock,
   ButtonBlock,
   ImageBlock,
   HtmlBlock,
+  TableBlock,
+  TableRow,
+  TableCell,
   CustomBlockDefinition,
   CustomBlockInstance,
   CustomBlockState,
@@ -22,7 +26,17 @@ export { exportHtml } from "./services/html_export";
 export { parseDocument } from "./services/json_import";
 export { serializeDocument } from "./services/json_export";
 export { validateDocument } from "./services/json_validation";
-export { createCustomBlockInstance } from "./services/document_service";
+export {
+  createCustomBlockInstance,
+  createTableBlock,
+  updateTableColumnCount,
+  addRowToTable,
+  deleteRowFromTable,
+  addBlockToCell,
+  replaceBlockInCell,
+  updateCellBlock,
+  deleteCellBlock
+} from "./services/document_service";
 export {
   registerCustomBlock,
   getCustomBlockDefinition,
@@ -30,3 +44,4 @@ export {
   subscribeCustomBlockDefinitions,
   DuplicateCustomBlockDefinitionError
 } from "./core/custom_block_registry";
+export { resolveCellWidths } from "./core/table_utils";

@@ -36,6 +36,9 @@
         @update="emitUpdate"
       />
       <HtmlBlock v-else-if="block.type === 'html'" :block="block" @update="emitUpdate" />
+      <div v-else-if="block.type === 'table'" class="ee-table-placeholder">
+        Table block
+      </div>
       <template v-else-if="block.type === 'custom'">
         <CustomBlockPlaceholder
           v-if="resolveCustomBlock(block).state !== 'ready'"
@@ -99,6 +102,8 @@ const getBlockLabel = (block: Block): string => {
       const definition = customDefinitions.value.get(block.definitionId);
       return definition?.displayName ?? "Custom block";
     }
+    case "table":
+      return "Table block";
     default:
       return "Block";
   }
@@ -255,5 +260,14 @@ onBeforeUnmount(() => {
 .ee-unknown {
   color: var(--ee-muted);
   font-size: 14px;
+}
+
+.ee-table-placeholder {
+  padding: 12px;
+  border: 1px dashed var(--ee-border);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--ee-muted);
+  text-align: center;
 }
 </style>

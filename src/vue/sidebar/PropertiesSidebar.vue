@@ -45,6 +45,13 @@
         @update="$emit('update-block', $event)"
       />
 
+      <TableBlockProperties
+        v-else-if="selectedBlock.type === 'table'"
+        :block="selectedBlock"
+        :on-image-upload="onImageUpload"
+        @update="$emit('update-block', $event)"
+      />
+
       <template v-else-if="selectedBlock.type === 'custom'">
         <div
           v-if="customBlockState && customBlockState.state !== 'ready'"
@@ -77,6 +84,7 @@ import TextBlockProperties from "./TextBlockProperties.vue";
 import ButtonBlockProperties from "./ButtonBlockProperties.vue";
 import ImageBlockProperties from "./ImageBlockProperties.vue";
 import HtmlBlockProperties from "./HtmlBlockProperties.vue";
+import TableBlockProperties from "./TableBlockProperties.vue";
 import CustomBlockProperties from "./CustomBlockProperties.vue";
 
 const props = defineProps<{
@@ -109,6 +117,7 @@ const title = computed(() => {
     case "button": return "Button Properties";
     case "image": return "Image Properties";
     case "html": return "HTML Properties";
+    case "table": return "Table Properties";
     case "custom": return "Custom Block Properties";
     default: return "Block Properties";
   }

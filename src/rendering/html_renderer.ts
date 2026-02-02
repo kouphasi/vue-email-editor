@@ -2,13 +2,16 @@ import {
   Block,
   BlockAlign,
   ButtonBlock,
+  CellBlock,
   CustomBlockDefinition,
   CustomBlockInstance,
   HtmlBlock,
   ImageBlock,
+  TableBlock,
   TextBlock
 } from "../core/types";
 import { getCustomBlockDefinition } from "../core/custom_block_registry";
+import { resolveCellWidths } from "../core/table_utils";
 import { DEFAULT_FONT_SIZE_PX } from "../core/validation";
 
 const escapeHtml = (value: string): string => {
@@ -112,6 +115,42 @@ const renderHtmlBlock = (block: HtmlBlock): string => {
   return block.content;
 };
 
+const renderCellBlocks = (
+  blocks: CellBlock[],
+  context: { mode: "preview" | "export" }
+): string => {
+  return blocks
+    .filter((block) =>
+      block.type === "text" ||
+      block.type === "button" ||
+      block.type === "image" ||
+      block.type === "html"
+    )
+    .map((block) => renderBlockHtml(block as Block, context))
+    .join("");
+};
+
+const renderTableBlock = (block: TableBlock, context: { mode: "preview" | "export" }): string => {
+  const padding = Number.isFinite(block.cellPadding ?? undefined) ? block.cellPadding ?? 8 : 8;
+  const rows = block.rows
+    .map((row) => {
+      const widths = resolveCellWidths(row, block.columnCount);
+      const cells = row.cells
+        .map((cell, index) => {
+          const width = widths[index] ?? (block.columnCount > 0 ? 100 / block.columnCount : 100);
+          return `<td width="${width}%" style="padding:${padding}px;vertical-align:top;">${renderCellBlocks(
+            cell.blocks,
+            context
+          )}</td>`;
+        })
+        .join("");
+      return `<tr>${cells}</tr>`;
+    })
+    .join("");
+
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-collapse:collapse;table-layout:fixed;width:100%;"><tbody>${rows}</tbody></table>`;
+};
+
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
@@ -208,6 +247,8 @@ export const renderBlockHtml = (
       return renderHtmlBlock(block);
     case "custom":
       return renderCustomBlock(block, context.mode);
+    case "table":
+      return renderTableBlock(block, context);
     default:
       return "";
   }

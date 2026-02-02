@@ -28,6 +28,13 @@
     >
       Add HTML
     </button>
+    <button
+      type="button"
+      class="ee-pill"
+      @click="addTable"
+    >
+      Add Table
+    </button>
 
     <button
       v-for="definition in customBlocks"
@@ -53,7 +60,7 @@ import type {
 } from "../../core/types";
 import { subscribeCustomBlockDefinitions } from "../../core/custom_block_registry";
 import { DEFAULT_FONT_SIZE_PX } from "../../core/validation";
-import { createCustomBlockInstance } from "../../services/document_service";
+import { createCustomBlockInstance, createTableBlock } from "../../services/document_service";
 
 const emit = defineEmits<{
   (event: "add", block: Block): void;
@@ -119,6 +126,10 @@ const addImage = (): void => {
 
 const addHtml = (): void => {
   emit("add", createHtmlBlock());
+};
+
+const addTable = (): void => {
+  emit("add", createTableBlock(2));
 };
 
 const addCustomBlock = (definition: CustomBlockDefinition): void => {

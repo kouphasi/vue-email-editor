@@ -51,6 +51,10 @@
             v-else-if="block.type === 'html'"
             :block="block"
           />
+          <CanvasTableBlock
+            v-else-if="block.type === 'table'"
+            :block="block"
+          />
           <CanvasCustomBlock
             v-else-if="block.type === 'custom' && resolveCustomBlock(block).state === 'ready'"
             :block="resolveCustomBlock(block)"
@@ -78,6 +82,7 @@ import CanvasTextBlock from "./CanvasTextBlock.vue";
 import CanvasButtonBlock from "./CanvasButtonBlock.vue";
 import CanvasImageBlock from "./CanvasImageBlock.vue";
 import CanvasHtmlBlock from "./CanvasHtmlBlock.vue";
+import CanvasTableBlock from "./CanvasTableBlock.vue";
 import CanvasCustomBlock from "./CanvasCustomBlock.vue";
 import CanvasCustomBlockPlaceholder from "./CanvasCustomBlockPlaceholder.vue";
 import { resolveCustomBlockState } from "../../core/custom_block_registry";
