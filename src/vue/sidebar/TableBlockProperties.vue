@@ -45,17 +45,6 @@
         <div v-for="(cell, cellIndex) in row.cells" :key="cell.id" class="ee-cell-card">
           <div class="ee-cell-header">
             <span class="ee-cell-title">Cell {{ cellIndex + 1 }}</span>
-            <div class="ee-cell-width">
-              <label>Width %</label>
-              <input
-                type="number"
-                min="1"
-                max="100"
-                step="1"
-                :value="getCellWidth(row, cellIndex)"
-                @input="handleCellWidthChange(row, cellIndex, $event)"
-              />
-            </div>
           </div>
 
           <div class="ee-cell-blocks">
@@ -102,7 +91,7 @@
 </template>
 
 <script setup lang="ts">
-import type { CellBlock, TableBlock, TableRow } from "../../core/types";
+import type { CellBlock, TableBlock } from "../../core/types";
 import type { ImageUploadHandler } from "../../core/editor_api";
 import {
   addRowToTable,
@@ -137,53 +126,6 @@ const getPreviewText = (text: string): string => {
 
 const columnOptions = [1, 2, 3, 4];
 
-const splitEvenly = (total: number, count: number): number[] => {
-  if (count <= 0) {
-    return [];
-  }
-  const base = Math.floor(total / count);
-  const remainder = total - base * count;
-  return Array.from({ length: count }, (_, index) => base + (index < remainder ? 1 : 0));
-};
-
-const getCellWidth = (row: TableRow, cellIndex: number): number => {
-  const cell = row.cells[cellIndex];
-  if (cell && typeof cell.widthPercent === "number" && Number.isFinite(cell.widthPercent)) {
-    return Math.round(cell.widthPercent);
-  }
-  const count = row.cells.length || props.block.columnCount || 1;
-  const widths = splitEvenly(100, count);
-  return widths[cellIndex] ?? Math.round(100 / count);
-};
-
-const updateRowWidths = (row: TableRow, cellIndex: number, nextValue: number): TableRow => {
-  const count = row.cells.length;
-  if (count === 0) {
-    return row;
-  }
-  const minWidth = 1;
-  const maxWidth = 100 - minWidth * (count - 1);
-  const clamped = Math.min(Math.max(Math.round(nextValue), minWidth), maxWidth);
-  const remaining = 100 - clamped;
-  const otherCount = count - 1;
-  const distributed = splitEvenly(remaining, otherCount);
-
-  let otherIndex = 0;
-  const cells = row.cells.map((cell, index) => {
-    if (index === cellIndex) {
-      return { ...cell, widthPercent: clamped };
-    }
-    const width = distributed[otherIndex] ?? Math.round(remaining / otherCount);
-    otherIndex += 1;
-    return { ...cell, widthPercent: width };
-  });
-
-  return {
-    ...row,
-    cells
-  };
-};
-
 const handleColumnCountChange = (event: Event) => {
   const input = event.target as HTMLSelectElement;
   const next = Number(input.value);
@@ -209,20 +151,6 @@ const handleAddRow = () => {
 
 const handleDeleteRow = (rowId: string) => {
   emit("update", deleteRowFromTable(props.block, rowId));
-};
-
-const handleCellWidthChange = (row: TableRow, cellIndex: number, event: Event) => {
-  const input = event.target as HTMLInputElement;
-  const value = Number(input.value);
-  if (!Number.isFinite(value)) {
-    return;
-  }
-  const nextRow = updateRowWidths(row, cellIndex, value);
-  const rows = props.block.rows.map((item) => (item.id === row.id ? nextRow : item));
-  emit("update", {
-    ...props.block,
-    rows
-  });
 };
 
 const handleDeleteCellBlock = (cellId: string, blockId: string) => {
@@ -335,19 +263,6 @@ const getBlockLabel = (block: CellBlock): string => {
   font-size: 12px;
   font-weight: 600;
   color: #111827;
-}
-
-.ee-cell-width label {
-  display: block;
-  font-size: 11px;
-  color: #6b7280;
-  margin-bottom: 4px;
-}
-
-.ee-cell-width input {
-  width: 80px;
-  padding: 6px;
-  font-size: 12px;
 }
 
 .ee-cell-blocks {
