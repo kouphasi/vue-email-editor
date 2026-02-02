@@ -100,6 +100,41 @@ const isAllowedCellBlock = (block: Block | CellBlock): block is CellBlock => {
   );
 };
 
+const findTableBlock = (document: Document, tableBlockId: string): TableBlock | null => {
+  const block = document.blocks.find((item) => item.id === tableBlockId);
+  if (block && block.type === "table") {
+    return block;
+  }
+  return null;
+};
+
+const findTableCell = (tableBlock: TableBlock, cellId: string): TableCell | null => {
+  for (const row of tableBlock.rows) {
+    const cell = row.cells.find((item) => item.id === cellId);
+    if (cell) {
+      return cell;
+    }
+  }
+  return null;
+};
+
+const findCellBlock = (
+  tableBlock: TableBlock,
+  cellId: string,
+  blockId: string
+): CellBlock | null => {
+  for (const row of tableBlock.rows) {
+    for (const cell of row.cells) {
+      if (cell.id !== cellId) {
+        continue;
+      }
+      const block = cell.blocks.find((item) => item.id === blockId);
+      return block ?? null;
+    }
+  }
+  return null;
+};
+
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
@@ -310,6 +345,158 @@ export const deleteCellBlock = (
   return {
     ...block,
     rows
+  };
+};
+
+export const moveCellBlockToTopLevel = (
+  document: Document,
+  tableBlockId: string,
+  cellId: string,
+  blockId: string,
+  targetIndex: number
+): Document => {
+  const tableBlock = findTableBlock(document, tableBlockId);
+  if (!tableBlock) {
+    return document;
+  }
+
+  const cellBlock = findCellBlock(tableBlock, cellId, blockId);
+  if (!cellBlock) {
+    return document;
+  }
+
+  const updatedTable = deleteCellBlock(tableBlock, cellId, blockId);
+  const updatedBlocks = document.blocks.map((block) =>
+    block.id === tableBlockId ? updatedTable : block
+  );
+
+  const maxIndex = updatedBlocks.length;
+  const resolvedIndex = Number.isFinite(targetIndex)
+    ? Math.min(Math.max(Math.round(targetIndex), 0), maxIndex)
+    : maxIndex;
+
+  const blocks = [...updatedBlocks];
+  blocks.splice(resolvedIndex, 0, cellBlock);
+
+  return {
+    ...document,
+    blocks
+  };
+};
+
+export const moveBlockToCell = (
+  document: Document,
+  blockIndex: number,
+  tableBlockId: string,
+  cellId: string
+): Document | null => {
+  if (!Number.isFinite(blockIndex)) {
+    return null;
+  }
+  const sourceBlock = document.blocks[blockIndex];
+  if (!sourceBlock || !isAllowedCellBlock(sourceBlock)) {
+    return null;
+  }
+
+  const tableBlock = findTableBlock(document, tableBlockId);
+  if (!tableBlock) {
+    return null;
+  }
+  const targetCell = findTableCell(tableBlock, cellId);
+  if (!targetCell || targetCell.blocks.length > 0) {
+    return null;
+  }
+
+  const updatedTable = replaceBlockInCell(tableBlock, cellId, sourceBlock);
+  const remainingBlocks = document.blocks.filter((_, index) => index !== blockIndex);
+  const blocks = remainingBlocks.map((block) =>
+    block.id === tableBlockId ? updatedTable : block
+  );
+
+  return {
+    ...document,
+    blocks
+  };
+};
+
+export const moveCellBlockToCell = (
+  document: Document,
+  sourceTableId: string,
+  sourceCellId: string,
+  blockId: string,
+  targetTableId: string,
+  targetCellId: string
+): Document | null => {
+  if (sourceTableId === targetTableId && sourceCellId === targetCellId) {
+    return null;
+  }
+
+  const sourceTable = findTableBlock(document, sourceTableId);
+  const targetTable = findTableBlock(document, targetTableId);
+  if (!sourceTable || !targetTable) {
+    return null;
+  }
+
+  const cellBlock = findCellBlock(sourceTable, sourceCellId, blockId);
+  if (!cellBlock) {
+    return null;
+  }
+
+  const targetCell = findTableCell(targetTable, targetCellId);
+  if (!targetCell || targetCell.blocks.length > 0) {
+    return null;
+  }
+
+  if (sourceTableId === targetTableId) {
+    const rows = sourceTable.rows.map((row) => ({
+      ...row,
+      cells: row.cells.map((cell) => {
+        if (cell.id === sourceCellId) {
+          return {
+            ...cell,
+            blocks: cell.blocks.filter((item) => item.id !== blockId)
+          };
+        }
+        if (cell.id === targetCellId) {
+          return {
+            ...cell,
+            blocks: [cellBlock]
+          };
+        }
+        return cell;
+      })
+    }));
+
+    const updatedTable: TableBlock = {
+      ...sourceTable,
+      rows
+    };
+
+    const blocks = document.blocks.map((block) =>
+      block.id === sourceTableId ? updatedTable : block
+    );
+
+    return {
+      ...document,
+      blocks
+    };
+  }
+
+  const updatedSourceTable = deleteCellBlock(sourceTable, sourceCellId, blockId);
+  const updatedTargetTable = replaceBlockInCell(targetTable, targetCellId, cellBlock);
+  const blocks = document.blocks.map((block) => {
+    if (block.id === sourceTableId) {
+      return updatedSourceTable;
+    }
+    if (block.id === targetTableId) {
+      return updatedTargetTable;
+    }
+    return block;
+  });
+
+  return {
+    ...document,
+    blocks
   };
 };
 

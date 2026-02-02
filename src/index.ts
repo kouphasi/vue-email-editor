@@ -35,7 +35,10 @@ export {
   addBlockToCell,
   replaceBlockInCell,
   updateCellBlock,
-  deleteCellBlock
+  deleteCellBlock,
+  moveCellBlockToTopLevel,
+  moveBlockToCell,
+  moveCellBlockToCell
 } from "./services/document_service";
 export {
   registerCustomBlock,

@@ -36,6 +36,9 @@
           @select-block="handleSelectBlock"
           @set-editing="handleSetEditing"
           @select-cell-block="handleSelectCellBlock"
+          @move-block-to-cell="handleMoveBlockToCell"
+          @move-cell-to-top-level="handleMoveCellBlockToTopLevel"
+          @move-cell-to-cell="handleMoveCellBlockToCell"
         />
       </div>
       
@@ -90,6 +93,9 @@ import {
   addBlock,
   createDocument,
   deleteBlock,
+  moveBlockToCell,
+  moveCellBlockToCell,
+  moveCellBlockToTopLevel,
   reorderBlocks,
   setPreviewMode,
   updateBlock,
@@ -277,6 +283,67 @@ const handleUpdateCellBlock = (cellBlock: CellBlock): void => {
     rows: updatedRows
   };
   setDocument(updateBlock(documentRef.value, updatedTable.id, () => updatedTable), true);
+};
+
+const handleMoveBlockToCell = (blockIndex: number, tableBlockId: string, cellId: string) => {
+  const sourceBlock = documentRef.value.blocks[blockIndex];
+  const result = moveBlockToCell(documentRef.value, blockIndex, tableBlockId, cellId);
+  if (!result) {
+    return;
+  }
+  setDocument(result, true);
+  if (sourceBlock && editorState.value.selectedBlockId === sourceBlock.id) {
+    editorState.value.parentTableContext = { tableBlockId, cellId };
+    editorState.value.isEditingText = false;
+  }
+};
+
+const handleMoveCellBlockToTopLevel = (
+  tableBlockId: string,
+  cellId: string,
+  blockId: string,
+  targetIndex: number
+) => {
+  const result = moveCellBlockToTopLevel(
+    documentRef.value,
+    tableBlockId,
+    cellId,
+    blockId,
+    targetIndex
+  );
+  if (result === documentRef.value) {
+    return;
+  }
+  setDocument(result, true);
+  if (editorState.value.selectedBlockId === blockId) {
+    editorState.value.parentTableContext = null;
+    editorState.value.isEditingText = false;
+  }
+};
+
+const handleMoveCellBlockToCell = (
+  sourceTableId: string,
+  sourceCellId: string,
+  blockId: string,
+  targetTableId: string,
+  targetCellId: string
+) => {
+  const result = moveCellBlockToCell(
+    documentRef.value,
+    sourceTableId,
+    sourceCellId,
+    blockId,
+    targetTableId,
+    targetCellId
+  );
+  if (!result) {
+    return;
+  }
+  setDocument(result, true);
+  if (editorState.value.selectedBlockId === blockId) {
+    editorState.value.parentTableContext = { tableBlockId: targetTableId, cellId: targetCellId };
+    editorState.value.isEditingText = false;
+  }
 };
 
 const handleSetEditing = (isEditing: boolean): void => {
