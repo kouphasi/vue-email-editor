@@ -1,8 +1,12 @@
+![002A0280-DEDC-41CB-BB4E-6F87F89F97DB_1_201_a](https://github.com/user-attachments/assets/af5ef402-86ff-49f8-9c2f-98f05d44d727)
+
+
 # Simple Vue Email Editor
 
 Block-based email editor library for Vue 2.7 / Vue 3.
-![002A0280-DEDC-41CB-BB4E-6F87F89F97DB_1_201_a](https://github.com/user-attachments/assets/af5ef402-86ff-49f8-9c2f-98f05d44d727)
 
+
+<img width="1466" height="836" alt="image" src="https://github.com/user-attachments/assets/9ff817e3-c305-4a22-8f4a-5c8021d02874" />
 
 [demo page](https://simple-vue-email-editor.vercel.app/)
 
