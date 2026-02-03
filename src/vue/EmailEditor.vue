@@ -506,6 +506,7 @@ defineExpose({
   padding: 40px;
   display: flex;
   justify-content: center;
+  align-items: flex-start;
   background: #f3f4f6;
   cursor: default; /* Make sure clicking bg is possible */
 }
