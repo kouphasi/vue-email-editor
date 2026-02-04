@@ -1,10 +1,10 @@
 # Block Types
 
-The Email Editor includes four built-in block types that cover common email content needs.
+The Email Editor includes five built-in block types that cover common email content needs.
 
 ## Text Block
 
-The text block displays formatted text content with support for bold styling, colors, and alignment.
+The text block displays formatted text content with support for bold styling, colors, alignment, and font size.
 
 ### Properties
 
@@ -12,7 +12,8 @@ The text block displays formatted text content with support for bold styling, co
 |----------|------|-------------|
 | `text` | `string` | The plain text content |
 | `runs` | `TextRun[]` | Formatting runs for styling portions of text |
-| `align` | `'left' \| 'center' \| 'right'` | Text alignment |
+| `fontSize` | `number` | Optional font size in pixels |
+| `align` | `'left' \| 'center' \| 'right'` | Optional text alignment |
 
 ### Text Runs
 
@@ -20,8 +21,8 @@ Text runs define formatting for character ranges within the text. Each run speci
 
 - `start`: Starting character index (inclusive)
 - `end`: Ending character index (exclusive)
-- `bold`: Whether the text is bold (optional)
-- `color`: Hex color code (optional)
+- `bold`: Whether the text is bold
+- `color`: Hex color code or `null`
 
 ```typescript
 // Example: "Hello World" with "World" in bold red
@@ -32,6 +33,7 @@ Text runs define formatting for character ranges within the text. Each run speci
   runs: [
     { start: 6, end: 11, bold: true, color: '#ff0000' }
   ],
+  fontSize: 16,
   align: 'left'
 }
 ```
@@ -39,7 +41,7 @@ Text runs define formatting for character ranges within the text. Each run speci
 ### Features
 
 - Select text in the editor to apply bold or color formatting
-- Runs are automatically merged and normalized
+- Runs must be sorted, non-overlapping, and within the text length
 - Empty or invalid runs are cleaned up on edit
 
 ---
@@ -55,9 +57,13 @@ The button block creates a clickable call-to-action element.
 | `label` | `string` | Button text |
 | `url` | `string` | Link URL (must be http:// or https://) |
 | `shape` | `'square' \| 'rounded' \| 'pill'` | Button corner style |
-| `color` | `string` | Background color (hex) |
 | `textColor` | `string` | Text color (hex) |
-| `align` | `'left' \| 'center' \| 'right'` | Button alignment |
+| `backgroundColor` | `string` | Background color (hex) |
+| `fontSize` | `number` | Optional font size in pixels |
+| `paddingVerticalPx` | `number` | Optional vertical padding in pixels |
+| `paddingHorizontalPx` | `number` | Optional horizontal padding in pixels |
+| `paddingLocked` | `boolean` | Optional padding lock state |
+| `align` | `'left' \| 'center' \| 'right'` | Optional button alignment |
 
 ### Example
 
@@ -68,8 +74,11 @@ The button block creates a clickable call-to-action element.
   label: 'Shop Now',
   url: 'https://example.com/shop',
   shape: 'rounded',
-  color: '#2b6cb0',
   textColor: '#ffffff',
+  backgroundColor: '#2b6cb0',
+  fontSize: 16,
+  paddingVerticalPx: 12,
+  paddingHorizontalPx: 20,
   align: 'center'
 }
 ```
@@ -77,7 +86,7 @@ The button block creates a clickable call-to-action element.
 ### Shape Options
 
 - **square**: No border radius (sharp corners)
-- **rounded**: Moderate border radius (4px)
+- **rounded**: Moderate border radius (8px)
 - **pill**: Maximum border radius (fully rounded ends)
 
 ---
@@ -90,12 +99,17 @@ The image block displays images with configurable dimensions and alignment.
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `src` | `string` | Image URL |
-| `alt` | `string` | Alternative text for accessibility |
-| `width` | `number` | Optional width in pixels |
-| `height` | `number` | Optional height in pixels |
-| `align` | `'left' \| 'center' \| 'right'` | Image alignment |
+| `url` | `string` | Image URL |
 | `status` | `'pending' \| 'ready' \| 'uploading' \| 'error'` | Upload status |
+| `display` | `ImageDisplay` | Display options for size and alignment |
+
+```typescript
+interface ImageDisplay {
+  widthPx?: number
+  heightPx?: number
+  align?: 'left' | 'center' | 'right'
+}
+```
 
 ### Example
 
@@ -103,12 +117,13 @@ The image block displays images with configurable dimensions and alignment.
 {
   type: 'image',
   id: 'image-1',
-  src: 'https://example.com/hero.jpg',
-  alt: 'Hero image',
-  width: 600,
-  height: 400,
-  align: 'center',
-  status: 'ready'
+  url: 'https://example.com/hero.jpg',
+  status: 'ready',
+  display: {
+    widthPx: 600,
+    heightPx: 400,
+    align: 'center'
+  }
 }
 ```
 
@@ -176,50 +191,125 @@ The HTML block allows embedding raw HTML content for advanced customization.
 
 ---
 
-## Block Alignment
+## Table Block
 
-All blocks except HTML support alignment through the `align` property:
+The table block creates a row/column layout using email-safe table markup.
 
-| Value | Description |
-|-------|-------------|
-| `left` | Align content to the left |
-| `center` | Center content horizontally |
-| `right` | Align content to the right |
+### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `rows` | `TableRow[]` | Table rows and cells |
+| `columnCount` | `number` | Number of columns (1 to 4) |
+| `cellPadding` | `number` | Optional padding inside each cell in pixels |
+
+### Table Rows and Cells
+
+```typescript
+interface TableRow {
+  id: string
+  cells: TableCell[]
+}
+
+interface TableCell {
+  id: string
+  widthPercent?: number
+  blocks: CellBlock[]
+}
+
+type CellBlock = TextBlock | ButtonBlock | ImageBlock | HtmlBlock
+```
+
+### Example
+
+```typescript
+{
+  type: 'table',
+  id: 'table-1',
+  columnCount: 2,
+  cellPadding: 8,
+  rows: [
+    {
+      id: 'row-1',
+      cells: [
+        {
+          id: 'cell-1',
+          widthPercent: 50,
+          blocks: [
+            {
+              type: 'text',
+              id: 'text-2',
+              text: 'Left column',
+              runs: [],
+              fontSize: 16
+            }
+          ]
+        },
+        {
+          id: 'cell-2',
+          widthPercent: 50,
+          blocks: []
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Notes
+
+- Each row must include exactly `columnCount` cells
+- Each cell may include **at most one** block
+- Cell blocks are limited to `text`, `button`, `image`, and `html`
+- `widthPercent` is optional; missing widths share the remaining space
+- When all widths are provided, they should total 100 (validation enforces this)
+
+---
+
+## Alignment
+
+- **Text** and **Button** use the `align` property
+- **Image** uses `display.align`
+- **Table** alignment is controlled by cell widths; there is no `align` property
 
 ---
 
 ## Default Values
 
-When creating new blocks, the editor applies these defaults:
+When creating new blocks via the editor, the defaults are:
 
 ### Text Block Defaults
 ```typescript
 {
-  text: '',
+  text: 'New text',
   runs: [],
-  align: 'left'
+  fontSize: 16
 }
 ```
 
 ### Button Block Defaults
 ```typescript
 {
-  label: 'Click Here',
-  url: '',
+  label: 'Button',
+  url: 'https://example.com',
   shape: 'rounded',
-  color: '#2b6cb0',
   textColor: '#ffffff',
-  align: 'center'
+  backgroundColor: '#2b6cb0',
+  fontSize: 16,
+  paddingVerticalPx: 12,
+  paddingHorizontalPx: 20,
+  paddingLocked: false
 }
 ```
 
 ### Image Block Defaults
 ```typescript
 {
-  src: '',
-  alt: '',
-  align: 'center',
-  status: 'pending'
+  url: '',
+  status: 'pending',
+  display: {
+    align: 'center'
+  }
 }
 ```
 
@@ -230,13 +320,29 @@ When creating new blocks, the editor applies these defaults:
 }
 ```
 
+### Table Block Defaults
+```typescript
+{
+  columnCount: 2,
+  cellPadding: 8,
+  rows: [
+    {
+      cells: [
+        { widthPercent: 50, blocks: [] },
+        { widthPercent: 50, blocks: [] }
+      ]
+    }
+  ]
+}
+```
+
 ---
 
 ## Block Operations
 
 ### Adding Blocks
 
-Use the block picker in the editor sidebar to add new blocks. Click the "+" button or select from the available block types.
+Use the block picker in the editor toolbar to add new blocks. Click the "+" button or select from the available block types.
 
 ### Reordering Blocks
 

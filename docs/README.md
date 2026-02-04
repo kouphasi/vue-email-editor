@@ -14,7 +14,7 @@ A block-based email editor library for Vue 2.7. Build beautiful, responsive emai
 Email Editor is a fully-featured, extensible email composition tool that enables developers to build and edit emails through a visual interface. It provides:
 
 - **Visual Editing**: Drag-and-drop block reordering with a responsive canvas
-- **Built-in Blocks**: Text, Button, Image, and HTML blocks ready to use
+- **Built-in Blocks**: Text, Button, Image, HTML, and Table blocks ready to use
 - **Custom Blocks**: Extend the editor with your own block types
 - **Export Options**: Export to JSON for storage or HTML for sending
 - **Mobile/Desktop Preview**: Toggle between preview modes to see how emails will appear on different devices
@@ -70,7 +70,7 @@ const handleImageUpload = async (file) => {
 
 ## Requirements
 
-- Vue 2.7.x
+- Vue 2.7.x or Vue 3.x
 
 ## License
 

@@ -12,7 +12,7 @@ Block-based email editor library for Vue 2.7 / Vue 3.
 
 ## Features
 
-- Block-based editing (text, button, image, HTML, custom)
+- Block-based editing (text, button, image, HTML, table, custom)
 - JSON document model with validation
 - HTML export for email delivery
 - Custom blocks with schema, defaults, validation, and HTML rendering
@@ -111,7 +111,7 @@ interface Document {
 }
 ```
 
-Built-in block types: `text`, `button`, `image`, `html`, `custom`.
+Built-in block types: `text`, `button`, `image`, `html`, `table`, `custom`.
 
 ## Programmatic API
 
@@ -124,6 +124,16 @@ import {
   serializeDocument,
   validateDocument,
   createCustomBlockInstance,
+  createTableBlock,
+  updateTableColumnCount,
+  addRowToTable,
+  deleteRowFromTable,
+  replaceBlockInCell,
+  updateCellBlock,
+  deleteCellBlock,
+  moveBlockToCell,
+  moveCellBlockToCell,
+  moveCellBlockToTopLevel,
   registerCustomBlock,
   getCustomBlockDefinition,
   listCustomBlockDefinitions,

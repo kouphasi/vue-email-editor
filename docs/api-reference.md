@@ -12,7 +12,7 @@ The main Vue component for rendering the email editor.
 |------|------|---------|-------------|
 | `json` | `string` | `undefined` | JSON-serialized document to load |
 | `document` | `Document \| null` | `undefined` | Document object to load directly |
-| `previewMode` | `'mobile' \| 'desktop'` | `'desktop'` | Preview mode for the canvas |
+| `previewMode` | `'mobile' \| 'desktop'` | `'mobile'` | Preview mode for the canvas |
 | `onImageUpload` | `ImageUploadHandler` | `undefined` | Handler function for image uploads |
 
 ### Events
@@ -108,7 +108,15 @@ interface LayoutSettings {
 Union type of all block types.
 
 ```typescript
-type Block = TextBlock | ButtonBlock | ImageBlock | HtmlBlock | CustomBlockInstance
+type Block = TextBlock | ButtonBlock | ImageBlock | HtmlBlock | CustomBlockInstance | TableBlock
+```
+
+### CellBlock
+
+Blocks that can appear inside table cells.
+
+```typescript
+type CellBlock = TextBlock | ButtonBlock | ImageBlock | HtmlBlock
 ```
 
 ### TextBlock
@@ -119,14 +127,15 @@ interface TextBlock {
   id: string
   text: string
   runs: TextRun[]
-  align: 'left' | 'center' | 'right'
+  fontSize?: number
+  align?: 'left' | 'center' | 'right'
 }
 
 interface TextRun {
   start: number
   end: number
-  bold?: boolean
-  color?: string  // Hex color (#RGB or #RRGGBB)
+  bold: boolean
+  color: string | null  // Hex color (#RGB or #RRGGBB)
 }
 ```
 
@@ -139,9 +148,13 @@ interface ButtonBlock {
   label: string
   url: string
   shape: 'square' | 'rounded' | 'pill'
-  color: string      // Background color (hex)
-  textColor: string  // Text color (hex)
-  align: 'left' | 'center' | 'right'
+  textColor: string        // Text color (hex)
+  backgroundColor: string  // Background color (hex)
+  fontSize?: number
+  paddingVerticalPx?: number
+  paddingHorizontalPx?: number
+  paddingLocked?: boolean
+  align?: 'left' | 'center' | 'right'
 }
 ```
 
@@ -151,12 +164,13 @@ interface ButtonBlock {
 interface ImageBlock {
   type: 'image'
   id: string
-  src: string
-  alt: string
-  width?: number
-  height?: number
-  align: 'left' | 'center' | 'right'
+  url: string
   status: 'pending' | 'ready' | 'uploading' | 'error'
+  display: {
+    widthPx?: number
+    heightPx?: number
+    align?: 'left' | 'center' | 'right'
+  }
 }
 ```
 
@@ -167,6 +181,42 @@ interface HtmlBlock {
   type: 'html'
   id: string
   content: string  // Raw HTML content
+}
+```
+
+### TableBlock
+
+```typescript
+interface TableBlock {
+  type: 'table'
+  id: string
+  rows: TableRow[]
+  columnCount: number
+  cellPadding?: number
+}
+
+interface TableRow {
+  id: string
+  cells: TableCell[]
+}
+
+interface TableCell {
+  id: string
+  widthPercent?: number
+  blocks: CellBlock[]
+}
+```
+
+### CustomBlockInstance
+
+```typescript
+interface CustomBlockInstance {
+  type: 'custom'
+  id: string
+  definitionId: string
+  config: Record<string, unknown>
+  state: 'ready' | 'invalid' | 'missing-definition'
+  readOnly: boolean
 }
 ```
 
@@ -208,7 +258,7 @@ try {
 }
 ```
 
-#### `validateDocument(doc: Document): ValidationResult`
+#### `validateDocument(doc: Document): { valid: boolean; errors: string[] }`
 
 Validate a Document object's structure and content.
 
@@ -216,7 +266,7 @@ Validate a Document object's structure and content.
 import { validateDocument } from 'email-editor'
 
 const result = validateDocument(document)
-if (!result.ok) {
+if (!result.valid) {
   console.error('Validation errors:', result.errors)
 }
 ```
@@ -231,6 +281,76 @@ Render a Document to email-ready HTML with inline styles.
 import { exportHtml } from 'email-editor'
 
 const html = exportHtml(document)
+```
+
+---
+
+## Table Functions
+
+Helpers for creating and editing table blocks.
+
+### `createTableBlock(columnCount: number): TableBlock`
+
+Create a new table block. The column count is clamped to 1-4.
+
+### `updateTableColumnCount(block: TableBlock, newCount: number): TableBlock`
+
+Update the column count and resize existing rows/cells.
+
+### `addRowToTable(block: TableBlock): TableBlock`
+
+Append a new row using the current column count.
+
+### `deleteRowFromTable(block: TableBlock, rowId: string): TableBlock`
+
+Remove a row. The last row cannot be deleted.
+
+### `replaceBlockInCell(block: TableBlock, cellId: string, newBlock: CellBlock): TableBlock`
+
+Replace the block inside a cell (only `text`, `button`, `image`, or `html` are allowed).
+
+### `addBlockToCell(block: TableBlock, cellId: string, newBlock: CellBlock): TableBlock`
+
+Deprecated alias of `replaceBlockInCell`.
+
+### `updateCellBlock(block: TableBlock, cellId: string, blockId: string, updater: (block: CellBlock) => CellBlock): TableBlock`
+
+Update the block inside a cell.
+
+### `deleteCellBlock(block: TableBlock, cellId: string, blockId: string): TableBlock`
+
+Remove the block from a cell.
+
+### `moveBlockToCell(document: Document, blockIndex: number, tableBlockId: string, cellId: string): Document | null`
+
+Move a top-level block into a table cell if the cell is empty.
+
+### `moveCellBlockToCell(document: Document, sourceTableId: string, sourceCellId: string, blockId: string, targetTableId: string, targetCellId: string): Document | null`
+
+Move a block between table cells.
+
+### `moveCellBlockToTopLevel(document: Document, tableBlockId: string, cellId: string, blockId: string, targetIndex: number): Document`
+
+Move a cell block back to the top-level blocks list.
+
+### `resolveCellWidths(row: TableRow, columnCount: number): number[]`
+
+Resolve final cell widths by distributing missing widths and normalizing to 100%.
+
+### Example
+
+```typescript
+import { createTableBlock, replaceBlockInCell } from 'email-editor'
+
+const table = createTableBlock(2)
+const firstCellId = table.rows[0].cells[0].id
+
+const updated = replaceBlockInCell(table, firstCellId, {
+  type: 'text',
+  id: 'text-1',
+  text: 'Hello',
+  runs: []
+})
 ```
 
 ---

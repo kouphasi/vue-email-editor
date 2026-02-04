@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide will help you integrate the Email Editor into your Vue 2.7 application.
+This guide will help you integrate the Email Editor into your Vue 2.7 or Vue 3 application.
 
 ## Installation
 
