@@ -71,8 +71,8 @@
         <div class="ee-modal-body">
            <div class="ee-preview-toolbar">
               <PreviewToggle
-                :mode="previewMode"
-                @change="previewMode = $event"
+                :mode="documentPreviewMode"
+                @change="documentPreviewMode = $event"
               />
            </div>
            <div class="ee-preview-container" :style="{ width: previewWidth }">
@@ -155,7 +155,7 @@ const editorState = ref<EditorState>({
 const showFinalPreview = ref(false);
 const canvasRef = ref<InstanceType<typeof EditorCanvas> | null>(null);
 
-const previewMode = computed<PreviewMode>({
+const documentPreviewMode = computed<PreviewMode>({
   get: () => editorDocument.value.layout.previewMode,
   set: (mode) => {
     if (editorDocument.value.layout.previewMode === mode) {
@@ -169,12 +169,12 @@ const finalPreviewHtml = computed(() => {
   const content = editorDocument.value.blocks
     .map((block) => renderBlockHtml(block, { mode: "preview" }))
     .join("");
-  const width = previewMode.value === "mobile" ? 375 : 640;
+  const width = documentPreviewMode.value === "mobile" ? 375 : 640;
   return wrapEmailHtml(content, width, { responsive: true });
 });
 
 const previewWidth = computed(() => {
-    return previewMode.value === "mobile" ? "375px" : "640px";
+    return documentPreviewMode.value === "mobile" ? "375px" : "640px";
 });
 
 const setDocument = (next: Document, emitChanges: boolean): void => {
