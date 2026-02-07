@@ -1,6 +1,9 @@
 {
-  "name": "email-editor",
+  "name": "simple-vue-email-editor",
   "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "Block-based email editor library for Vue 2.7.",
   "type": "module",
   "main": "dist/vue3/email-editor.iife.js",
