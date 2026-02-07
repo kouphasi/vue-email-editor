@@ -4,6 +4,15 @@
   "publishConfig": {
     "access": "public"
   },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kouphasi/simple-vue-email-editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kouphasi/simple-vue-email-editor/issues"
+  },
+  "homepage": "https://github.com/kouphasi/simple-vue-email-editor#readme",
   "description": "Block-based email editor library for Vue 2.7.",
   "type": "module",
   "main": "dist/vue3/email-editor.iife.js",
