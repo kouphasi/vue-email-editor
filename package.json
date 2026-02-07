@@ -13,7 +13,7 @@
     "url": "https://github.com/kouphasi/simple-vue-email-editor/issues"
   },
   "homepage": "https://github.com/kouphasi/simple-vue-email-editor#readme",
-  "description": "Block-based email editor library for Vue 2.7.",
+  "description": "Block-based email editor library for Vue.",
   "type": "module",
   "main": "dist/vue3/email-editor.iife.js",
   "module": "dist/vue3/email-editor.es.js",
