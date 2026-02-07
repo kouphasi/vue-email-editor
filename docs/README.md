@@ -1,6 +1,6 @@
 # Email Editor Documentation
 
-A block-based email editor library for Vue 2.7. Build beautiful, responsive emails with a visual editor that supports both built-in and custom block types.
+A block-based email editor library for Vue 2.7 / Vue 3. Build beautiful, responsive emails with a visual editor that supports both built-in and custom block types.
 
 ## Table of Contents
 

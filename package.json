@@ -1,6 +1,6 @@
 {
   "name": "simple-vue-email-editor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publishConfig": {
     "access": "public"
   },
@@ -13,7 +13,7 @@
     "url": "https://github.com/kouphasi/simple-vue-email-editor/issues"
   },
   "homepage": "https://github.com/kouphasi/simple-vue-email-editor#readme",
-  "description": "Block-based email editor library for Vue 2.7.",
+  "description": "Block-based email editor library for Vue.js/ts.",
   "type": "module",
   "main": "dist/vue3/email-editor.iife.js",
   "module": "dist/vue3/email-editor.es.js",
